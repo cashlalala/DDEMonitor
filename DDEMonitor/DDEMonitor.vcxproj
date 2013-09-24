@@ -52,7 +52,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -101,15 +101,23 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Exception.h" />
+    <ClInclude Include="Core\StringUtil.h" />
     <ClInclude Include="DDEMonitor.h" />
     <ClInclude Include="DDEMonitorDlg.h" />
+    <ClInclude Include="DDE\DDEException.h" />
+    <ClInclude Include="DDE\DDEOperation.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Exception.cpp" />
+    <ClCompile Include="Core\StringUtil.cpp" />
     <ClCompile Include="DDEMonitor.cpp" />
     <ClCompile Include="DDEMonitorDlg.cpp" />
+    <ClCompile Include="DDE\DDEException.cpp" />
+    <ClCompile Include="DDE\DDEOperation.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -127,4 +135,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="DDEMonitor.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

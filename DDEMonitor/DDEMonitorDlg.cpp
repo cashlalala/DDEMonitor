@@ -6,11 +6,15 @@
 #include "DDEMonitor.h"
 #include "DDEMonitorDlg.h"
 #include "afxdialogex.h"
+#include "DDE\DDEException.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+using namespace DDE;
+
+#define MMSDDSINST _T("MMS")
 
 // 對 App About 使用 CAboutDlg 對話方塊
 
@@ -49,6 +53,9 @@ END_MESSAGE_MAP()
 
 CDDEMonitorDlg::CDDEMonitorDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CDDEMonitorDlg::IDD, pParent)
+	, m_strServer(_T(""))
+	, m_strTopic(_T(""))
+	, m_strItem(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -56,12 +63,19 @@ CDDEMonitorDlg::CDDEMonitorDlg(CWnd* pParent /*=NULL*/)
 void CDDEMonitorDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT1, m_strServer);
+	DDX_Text(pDX, IDC_EDIT2, m_strTopic);
+	DDX_Text(pDX, IDC_EDIT3, m_strItem);
 }
 
 BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_CLOSE()
+	ON_BN_CLICKED(IDC_BUTTON_CONN, &CDDEMonitorDlg::OnBnClickedButtonConn)
+	ON_BN_CLICKED(IDC_BUTTON_GETITEM, &CDDEMonitorDlg::OnBnClickedButtonGetitem)
+	ON_BN_CLICKED(IDC_BUTTON_CANCEL, &CDDEMonitorDlg::OnBnClickedButtonCancel)
 END_MESSAGE_MAP()
 
 
@@ -97,6 +111,20 @@ BOOL CDDEMonitorDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 設定小圖示
 
 	// TODO: 在此加入額外的初始設定
+	try
+	{
+		m_ddeOper.InitInstance(MMSDDSINST,0);
+		m_strServer = _T("DdemlSvr");
+		m_strTopic = _T("MyTopic");
+		m_strItem = _T("MyItem");
+
+		UpdateData(FALSE);
+	}
+	catch (CDDEException& e)
+	{
+		TRACE(_T("%s\n"),e.twhat());
+	}
+	
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
@@ -150,3 +178,68 @@ HCURSOR CDDEMonitorDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CDDEMonitorDlg::OnClose()
+{
+	try
+	{
+		m_ddeOper.UninitAll();
+	}
+	catch (DDE::CDDEException& e)
+	{
+		TRACE(_T("%s\n"),e.twhat());
+	}
+	
+
+	CDialogEx::OnClose();
+}
+
+
+void CDDEMonitorDlg::OnBnClickedButtonConn()
+{
+	UpdateData(TRUE);
+	try
+	{
+		m_strConvId = m_ddeOper.Connect(MMSDDSINST,m_strServer,m_strTopic,NULL);
+	}
+	catch (CDDEException& e)
+	{
+		TRACE(_T("%s\n"),e.twhat());
+	}
+	catch (std::exception& e)
+	{
+		CString strWhat = CA2W(e.what());
+		TRACE(_T("%s\n"),strWhat);
+	}
+	
+}
+
+
+void CDDEMonitorDlg::OnBnClickedButtonGetitem()
+{
+	UpdateData(TRUE);
+
+	try
+	{
+		HDDEDATA hData = m_ddeOper.DoTransaction(m_strConvId,m_strItem,CF_TEXT,XTYP_ADVSTART|XTYPF_ACKREQ,5000);
+	}
+	catch (CDDEException& e)
+	{
+		TRACE(_T("%s\n"),e.twhat());
+	}
+}
+
+
+void CDDEMonitorDlg::OnBnClickedButtonCancel()
+{
+	try
+	{
+		HDDEDATA hData = m_ddeOper.DoTransaction(m_strConvId,m_strItem,CF_TEXT,XTYP_ADVSTOP,5000);
+	}
+	catch (CDDEException& e)
+	{
+		TRACE(_T("%s\n"),e.twhat());
+	}
+	
+}

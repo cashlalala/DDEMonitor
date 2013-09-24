@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "DDE\DDEOperation.h"
 
 // CDDEMonitorDlg 對話方塊
 class CDDEMonitorDlg : public CDialogEx
@@ -23,10 +24,22 @@ public:
 protected:
 	HICON m_hIcon;
 
+	DDE::CDDEOperation m_ddeOper; 
+
 	// 產生的訊息對應函式
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnClose();
+	CString m_strServer;
+	CString m_strTopic;
+	CString m_strItem;
+
+	CString m_strConvId;
+	afx_msg void OnBnClickedButtonConn();
+	afx_msg void OnBnClickedButtonGetitem();
+	afx_msg void OnBnClickedButtonCancel();
 };

@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{65da06bb-a752-4d8a-a66f-afce0e5fde1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DDE">
+      <UniqueIdentifier>{e63ccb4b-77c6-42a4-b25d-48eea76b0d37}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -33,6 +39,18 @@
     <ClInclude Include="Resource.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Exception.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DDE\DDEException.h">
+      <Filter>DDE</Filter>
+    </ClInclude>
+    <ClInclude Include="DDE\DDEOperation.h">
+      <Filter>DDE</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\StringUtil.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDEMonitor.cpp">
@@ -43,6 +61,18 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Exception.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="DDE\DDEException.cpp">
+      <Filter>DDE</Filter>
+    </ClCompile>
+    <ClCompile Include="DDE\DDEOperation.cpp">
+      <Filter>DDE</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\StringUtil.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
