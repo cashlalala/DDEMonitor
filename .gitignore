@@ -1,0 +1,13 @@
+# git ignore file
+Debug/
+Release/
+*.sdf
+*.suo
+*.tlog
+*.obj
+*.opensdf
+*.log
+*.tlog
+*.aps
+*.bak
+ipch/
