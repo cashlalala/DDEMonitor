@@ -103,6 +103,16 @@
   <ItemGroup>
     <ClInclude Include="Core\Exception.h" />
     <ClInclude Include="Core\StringUtil.h" />
+    <ClInclude Include="CustomControl\DataGrid\CellRange.h" />
+    <ClInclude Include="CustomControl\DataGrid\GridCell.h" />
+    <ClInclude Include="CustomControl\DataGrid\GridCellBase.h" />
+    <ClInclude Include="CustomControl\DataGrid\GridCellCheck.h" />
+    <ClInclude Include="CustomControl\DataGrid\GridCtrl.h" />
+    <ClInclude Include="CustomControl\DataGrid\GridDropTarget.h" />
+    <ClInclude Include="CustomControl\DataGrid\InPlaceEdit.h" />
+    <ClInclude Include="CustomControl\DataGrid\InPlaceList.h" />
+    <ClInclude Include="CustomControl\DataGrid\MemDC.h" />
+    <ClInclude Include="CustomControl\DataGrid\TitleTip.h" />
     <ClInclude Include="DDEMonitor.h" />
     <ClInclude Include="DDEMonitorDlg.h" />
     <ClInclude Include="DDE\DDEException.h" />
@@ -114,6 +124,14 @@
   <ItemGroup>
     <ClCompile Include="Core\Exception.cpp" />
     <ClCompile Include="Core\StringUtil.cpp" />
+    <ClCompile Include="CustomControl\DataGrid\GridCell.cpp" />
+    <ClCompile Include="CustomControl\DataGrid\GridCellBase.cpp" />
+    <ClCompile Include="CustomControl\DataGrid\GridCellCheck.cpp" />
+    <ClCompile Include="CustomControl\DataGrid\GridCtrl.cpp" />
+    <ClCompile Include="CustomControl\DataGrid\GridDropTarget.cpp" />
+    <ClCompile Include="CustomControl\DataGrid\InPlaceEdit.cpp" />
+    <ClCompile Include="CustomControl\DataGrid\InPlaceList.cpp" />
+    <ClCompile Include="CustomControl\DataGrid\TitleTip.cpp" />
     <ClCompile Include="DDEMonitor.cpp" />
     <ClCompile Include="DDEMonitorDlg.cpp" />
     <ClCompile Include="DDE\DDEException.cpp" />

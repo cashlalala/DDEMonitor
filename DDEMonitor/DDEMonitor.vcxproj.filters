@@ -19,6 +19,12 @@
     <Filter Include="DDE">
       <UniqueIdentifier>{e63ccb4b-77c6-42a4-b25d-48eea76b0d37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CustomControl">
+      <UniqueIdentifier>{f2977a4f-4787-488a-8656-517b12006ac5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CustomControl\DataGrid">
+      <UniqueIdentifier>{d28ad520-1bca-4ca2-aa31-2ab14102d435}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -51,6 +57,36 @@
     <ClInclude Include="Core\StringUtil.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\CellRange.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\GridCell.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\GridCellBase.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\GridCellCheck.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\GridCtrl.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\GridDropTarget.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\InPlaceEdit.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\MemDC.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\InPlaceList.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomControl\DataGrid\TitleTip.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDEMonitor.cpp">
@@ -73,6 +109,30 @@
     </ClCompile>
     <ClCompile Include="Core\StringUtil.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\DataGrid\GridCell.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\DataGrid\GridCellBase.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\DataGrid\GridCellCheck.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\DataGrid\GridCtrl.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\DataGrid\GridDropTarget.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\DataGrid\InPlaceEdit.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\DataGrid\InPlaceList.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\DataGrid\TitleTip.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

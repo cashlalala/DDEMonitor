@@ -66,6 +66,8 @@ void CDDEMonitorDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT1, m_strServer);
 	DDX_Text(pDX, IDC_EDIT2, m_strTopic);
 	DDX_Text(pDX, IDC_EDIT3, m_strItem);
+	DDX_Control(pDX, IDC_GRID, m_ctrlGridDDEFunc);
+	DDX_Control(pDX, IDC_GRID_OUTPUT, m_ctrlGridOutput);	
 }
 
 BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
@@ -75,7 +77,6 @@ BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON_CONN, &CDDEMonitorDlg::OnBnClickedButtonConn)
 	ON_BN_CLICKED(IDC_BUTTON_GETITEM, &CDDEMonitorDlg::OnBnClickedButtonGetitem)
-	ON_BN_CLICKED(IDC_BUTTON_CANCEL, &CDDEMonitorDlg::OnBnClickedButtonCancel)
 END_MESSAGE_MAP()
 
 
@@ -111,6 +112,17 @@ BOOL CDDEMonitorDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 設定小圖示
 
 	// TODO: 在此加入額外的初始設定
+	m_ctrlGridDDEFunc.SetEditable(TRUE);
+	m_ctrlGridDDEFunc.EnableDragAndDrop(TRUE);
+	m_ctrlGridDDEFunc.GetDefaultCell(FALSE, FALSE)->SetBackClr(RGB(0xFF, 0xFF, 0xE0));
+
+	m_ctrlGridOutput.SetEditable(TRUE);
+	m_ctrlGridOutput.EnableDragAndDrop(TRUE);
+	m_ctrlGridOutput.SetRowCount(50);
+	m_ctrlGridOutput.SetColumnCount(10);
+	m_ctrlGridOutput.SetFixedRowCount(1);
+	m_ctrlGridOutput.SetFixedColumnCount(1);
+
 	try
 	{
 		m_ddeOper.InitInstance(MMSDDSINST,0);
@@ -231,7 +243,7 @@ void CDDEMonitorDlg::OnBnClickedButtonGetitem()
 }
 
 
-void CDDEMonitorDlg::OnBnClickedButtonCancel()
+void CDDEMonitorDlg::OnBnClickedButtonCancelAdvice()
 {
 	try
 	{
@@ -241,5 +253,4 @@ void CDDEMonitorDlg::OnBnClickedButtonCancel()
 	{
 		TRACE(_T("%s\n"),e.twhat());
 	}
-	
 }
