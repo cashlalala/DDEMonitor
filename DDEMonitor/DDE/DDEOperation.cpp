@@ -130,7 +130,7 @@ namespace DDE
 			throw CDDEException(CDDEException::E_DISCONN_FAILED,CDDEException::GetLastError(dwInst));
 	}
 
-	HDDEDATA CDDEOperation::DoTransaction( const CString& strConvId, const CString& strItem, UINT unFmt, UINT unType, DWORD dwTimeout )
+	void CDDEOperation::DoTransaction( const CString& strConvId, const CString& strItem, UINT unFmt, UINT unType, DWORD dwTimeout )
 	{
 		const HCONV hConv = m_mapConversation[strConvId];
 		CString strInst, strSvr, strTopic;
@@ -138,12 +138,22 @@ namespace DDE
 
 		HSZ hSzItem = CreateStrHandle(m_mapInst[strInst],strItem);
 
-
 		HDDEDATA hData = DdeClientTransaction(NULL,NULL,hConv,hSzItem,unFmt,unType,dwTimeout,NULL);
+
+		FreeStrHandle(m_mapInst[strInst],hSzItem);
+
 		if (!hData)
 			throw CDDEException(CDDEException::E_DATA_FAILED,CDDEException::GetLastError(m_mapInst[strInst]));
-		else
-			return hData;
+
+		if (unType&XCLASS_DATA)
+		{
+			char lpszData[100];
+			memset(lpszData,0x0,100);
+			DWORD dwResult = DdeGetData(hData,(LPBYTE)lpszData,99,0);
+			TRACE("GetData in Transaction: %s\n",lpszData);
+			FreeDataHandle(m_mapInst[strInst],hData);
+		}
+		
 	}
 
 	HSZ CDDEOperation::CreateStrHandle( DWORD dwInst, const CString& strTarget )

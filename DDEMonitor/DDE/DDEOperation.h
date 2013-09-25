@@ -15,7 +15,7 @@ namespace DDE
 
 		CString Connect(const CString& strInst, const CString& strSvr, const CString& strTopic, PCONVCONTEXT pConvContext);
 
-		HDDEDATA DoTransaction(const CString& strConvId, const CString& strItem, UINT unFmt, UINT unType, DWORD dwTimeout);
+		void DoTransaction(const CString& strConvId, const CString& strItem, UINT unFmt, UINT unType, DWORD dwTimeout);
 
 		void UninitAll();
 

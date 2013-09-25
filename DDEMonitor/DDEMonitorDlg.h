@@ -8,6 +8,10 @@
 
 #include "CustomControl\DataGrid\GridCtrl.h"
 
+#include <vector>
+#include <map>
+#include "afxwin.h"
+
 // CDDEMonitorDlg ¹ï¸Ü¤è¶ô
 class CDDEMonitorDlg : public CDialogEx
 {
@@ -41,9 +45,16 @@ public:
 	CString m_strTopic;
 	CString m_strItem;
 	CString m_strConvId;
+	CString m_strItemName;
 
 	CGridCtrl m_ctrlGridDDEFunc;
 	CGridCtrl m_ctrlGridOutput;
+
+	CButton m_btnAdvise;
+
+	std::map<CString,CString> m_mapCurItem;
+
+	std::vector<std::map<CString,CString> > m_lstOutput;
 
 public:
 	afx_msg void OnClose();
@@ -51,4 +62,10 @@ public:
 	afx_msg void OnBnClickedButtonGetitem();
 	afx_msg void OnEnChangeEdit2();
 	afx_msg void OnBnClickedButtonCancelAdvice();
+	afx_msg void OnBnClickedButtonAdd();
+	afx_msg void OnBnClickedButtonRemove();
+	afx_msg void OnDDEFuncGridClick(NMHDR *pNotifyStruct, LRESULT* /*pResult*/);
+	
+	afx_msg void OnBnClickedButtonAdvise();
+	
 };
