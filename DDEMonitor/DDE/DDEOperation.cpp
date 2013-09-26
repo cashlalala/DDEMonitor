@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "DDEOperation.h"
 #include "DDEException.h"
+#include "DDEKernel.h"
+
+std::map<CString,DWORD> InstanceMap;
 
 namespace DDE
 {
@@ -25,16 +28,41 @@ namespace DDE
 		_In_ ULONG_PTR dwData1, 
 		_In_ ULONG_PTR dwData2 )
 	{
-
-		char lpszData[100];
-		memset(lpszData,0x0,100);
-
 		switch (uType)
 		{
 		case XTYP_ADVDATA:
 			{
-				DWORD dwResult = DdeGetData(hdata,(LPBYTE)lpszData,99,0);
-				//CString strLog = CA2W(lpszData);
+				char lpszData[100];
+				memset(lpszData,0x0,100);
+				DWORD dwLen = DdeGetData(hdata,(LPBYTE)lpszData,99,0);
+				CA2W wstrData(lpszData);
+
+				TCHAR* pData = new TCHAR[dwLen+2];
+				memset(pData,_T('\0'),sizeof(TCHAR)* (dwLen+2));
+				if (!pData) break;
+				
+				_tcscpy_s(pData,dwLen+1,wstrData);
+
+				TypDDEItem* pItem = new TypDDEItem;
+				if (!pItem)
+				{
+					delete[] pData;
+					break;
+				}
+				DWORD& dwInst = InstanceMap[MMSDDSINST];
+
+				dwLen = DdeQueryString(dwInst,hsz1,0,0,CP_WINUNICODE);
+				DdeQueryString(dwInst,hsz1,pItem->strTopic.GetBuffer(dwLen+2),dwLen+1,CP_WINUNICODE);
+				pItem->strTopic.ReleaseBuffer();
+				TRACE(_T("Topic: %s\n"),pItem->strTopic);
+
+				dwLen = DdeQueryString(dwInst,hsz2,0,0,CP_WINUNICODE);
+				DdeQueryString(dwInst,hsz2,pItem->strItem.GetBuffer(dwLen+2),dwLen+1,CP_WINUNICODE);
+				pItem->strItem.ReleaseBuffer();
+				TRACE(_T("Item: %s\n"),pItem->strItem);
+
+				CWnd* pWnd = AfxGetMainWnd();
+				::PostMessage(pWnd->m_hWnd,WM_UPDATE_DATA,(WPARAM)pItem,(LPARAM)pData);
 				TRACE("XTYP_ADVDATA %s\n",lpszData);
 				break;
 			}
@@ -46,10 +74,10 @@ namespace DDE
 
 	void CDDEOperation::InitInstance( const CString& strInstName, DWORD dwCmd /*= APPCMD_CLIENTONLY*/ )
 	{
-		if (m_mapInst.find(strInstName)==m_mapInst.end())
+		if (InstanceMap.find(strInstName)==InstanceMap.end())
 		{
-			m_mapInst[strInstName] = 0;
-			UINT unResult = DdeInitialize(&m_mapInst[strInstName],CDDEOperation::DdeCallback,dwCmd,NULL);
+			InstanceMap[strInstName] = 0;
+			UINT unResult = DdeInitialize(&InstanceMap[strInstName],CDDEOperation::DdeCallback,dwCmd,NULL);
 			if (unResult!=DMLERR_NO_ERROR)
 				throw CDDEException(CDDEException::E_INIT_FAILED,unResult);
 		}
@@ -59,17 +87,17 @@ namespace DDE
 	{
 		BOOL bResult = TRUE;
 
-		for (auto hInstPair : m_mapInst)
+		for (auto& hInstPair : InstanceMap)
 		{
-			for (auto hConvPair : m_mapConversation)
+			for (auto& hConvPair : m_mapConversation)
 			{
 				TRACE(_T("Disconnecting Server [%s]...\n"),hConvPair.first);
 				Disconnect(hInstPair.second,hConvPair.second);
 			}
 
-			for (auto hServerPair : m_mapServer[hInstPair.second])
+			for (auto& hServerPair : m_mapServer[hInstPair.second])
 			{
-				for (auto hTopicPair : m_mapTopic[hServerPair.second])
+				for (auto& hTopicPair : m_mapTopic[hServerPair.second])
 				{
 					TRACE(_T("Freeing Topic String [%s]...\n"),hTopicPair.first);
 					FreeStrHandle(hInstPair.second,hTopicPair.second);
@@ -98,7 +126,7 @@ namespace DDE
 
 	CString CDDEOperation::Connect( const CString& strInst, const CString& strSvr, const CString& strTopic, PCONVCONTEXT pConvContext )
 	{
-		const DWORD& hInst = m_mapInst[strInst];
+		const DWORD& hInst = InstanceMap[strInst];
 
 		if (m_mapServer[hInst].find(strSvr)==m_mapServer[hInst].end())
 			m_mapServer[hInst][strSvr] = CreateStrHandle(hInst,strSvr);
@@ -136,14 +164,14 @@ namespace DDE
 		CString strInst, strSvr, strTopic;
 		ResovleConvId(strConvId,strInst,strSvr,strTopic);
 
-		HSZ hSzItem = CreateStrHandle(m_mapInst[strInst],strItem);
+		HSZ hSzItem = CreateStrHandle(InstanceMap[strInst],strItem);
 
 		HDDEDATA hData = DdeClientTransaction(NULL,NULL,hConv,hSzItem,unFmt,unType,dwTimeout,NULL);
 
-		FreeStrHandle(m_mapInst[strInst],hSzItem);
+		FreeStrHandle(InstanceMap[strInst],hSzItem);
 
 		if (!hData)
-			throw CDDEException(CDDEException::E_DATA_FAILED,CDDEException::GetLastError(m_mapInst[strInst]));
+			throw CDDEException(CDDEException::E_DATA_FAILED,CDDEException::GetLastError(InstanceMap[strInst]));
 
 		if (unType&XCLASS_DATA)
 		{
@@ -151,7 +179,7 @@ namespace DDE
 			memset(lpszData,0x0,100);
 			DWORD dwResult = DdeGetData(hData,(LPBYTE)lpszData,99,0);
 			TRACE("GetData in Transaction: %s\n",lpszData);
-			FreeDataHandle(m_mapInst[strInst],hData);
+			FreeDataHandle(InstanceMap[strInst],hData);
 		}
 		
 	}

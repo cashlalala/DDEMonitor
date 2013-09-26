@@ -1,0 +1,59 @@
+#pragma once
+
+#ifdef UNICODE
+#define CP(TEXT) _T(TEXT)
+#else
+#define CP(TEXT) TEXT
+#endif // DEBUG
+
+#define DDEID_RISEFALL CP(".184") //漲跌
+#define DDEID_STRIKEPC CP(".125") //成交價
+#define DDEID_VOLUME CP(".404") //成交量
+#define DDEID_BUYPC CP(".101") //買價
+#define DDEID_SELLPC CP(".102") //賣價
+#define DDEID_TIME CP(".143") //時間
+#define DDEID_CODE CP(".1018") //代碼
+#define DDEID_NAME CP(".2020") //名稱
+
+#define DDENAME_RISEFALL CP("漲跌") //.184
+#define DDENAME_STRIKEPC CP("成交價") //.125
+#define DDENAME_VOLUME CP("成交量") //.404
+#define DDENAME_BUYPC CP("買價") //.101
+#define DDENAME_SELLPC CP("賣價") //.102
+#define DDENAME_TIME CP("時間") //.143
+#define DDENAME_CODE CP("代碼") //.1018
+#define DDENAME_NAME CP("名稱") //.2020
+
+#define JY_AMP_ID CP("M1JY&")
+#define JY_AMP(DDEID) CP("M1JY&")DDEID
+
+#define JY_AMP_RISEFALL JY_AMP(DDEID_RISEFALL) //漲跌
+#define JY_AMP_STRIKEPC JY_AMP(DDEID_STRIKEPC) //成交價
+#define JY_AMP_VOLUME JY_AMP(DDEID_VOLUME) //成交量
+#define JY_AMP_BUYPC JY_AMP(DDEID_BUYPC) //買價
+#define JY_AMP_SELLPC JY_AMP(DDEID_SELLPC) //賣價
+#define JY_AMP_TIME JY_AMP(DDEID_TIME) //時間
+#define JY_AMP_CODE JY_AMP(DDEID_CODE) //代碼
+#define JY_AMP_NAME JY_AMP(DDEID_NAME) //名稱
+
+#define GET_NAME_FROM_ID(id) \
+((id.Right(4)==DDEID_RISEFALL)? DDENAME_RISEFALL :\
+(id.Right(4)==DDEID_STRIKEPC)? DDENAME_STRIKEPC :\
+(id.Right(4)==DDEID_VOLUME)? DDENAME_VOLUME :\
+(id.Right(4)==DDEID_BUYPC)? DDENAME_BUYPC :\
+(id.Right(4)==DDEID_SELLPC)? DDENAME_SELLPC :\
+(id.Right(4)==DDEID_TIME)? DDENAME_TIME :\
+(id.Right(5)==DDEID_CODE)? DDENAME_CODE :\
+(id.Right(5)==DDEID_NAME)? DDENAME_NAME :\
+CP(""))
+
+#define GET_ID_FROM_NAME(name) \
+((name==DDENAME_RISEFALL)? DDEID_RISEFALL:\
+(name==DDENAME_STRIKEPC)? DDEID_STRIKEPC:\
+(name==DDENAME_VOLUME)? DDEID_VOLUME:\
+(name==DDENAME_BUYPC)? DDEID_BUYPC:\
+(name==DDENAME_SELLPC)? DDEID_SELLPC:\
+(name==DDENAME_TIME)? DDEID_TIME:\
+(name==DDENAME_CODE)? DDEID_CODE:\
+(name==DDENAME_NAME)? DDEID_NAME:\
+CP(""))

@@ -102,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Exception.h" />
+    <ClInclude Include="Core\MapUtil.h" />
     <ClInclude Include="Core\StringUtil.h" />
     <ClInclude Include="CustomControl\DataGrid\CellRange.h" />
     <ClInclude Include="CustomControl\DataGrid\GridCell.h" />
@@ -116,6 +117,8 @@
     <ClInclude Include="DDEMonitor.h" />
     <ClInclude Include="DDEMonitorDlg.h" />
     <ClInclude Include="DDE\DDEException.h" />
+    <ClInclude Include="DDE\DDEItems.h" />
+    <ClInclude Include="DDE\DDEKernel.h" />
     <ClInclude Include="DDE\DDEOperation.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -123,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Exception.cpp" />
+    <ClCompile Include="Core\MapUtil.cpp" />
     <ClCompile Include="Core\StringUtil.cpp" />
     <ClCompile Include="CustomControl\DataGrid\GridCell.cpp" />
     <ClCompile Include="CustomControl\DataGrid\GridCellBase.cpp" />

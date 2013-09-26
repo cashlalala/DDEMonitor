@@ -32,7 +32,7 @@ namespace DDE
 		void Disconnect(DWORD dwInst, HCONV hConv);
 
 
-		std::map<CString,DWORD>						m_mapInst;
+		//std::map<CString,DWORD>						m_mapInst;
 		std::map<DWORD,std::map<CString,HSZ> >		m_mapServer;
 		std::map<HSZ,std::map<CString,HSZ> >		m_mapTopic;
 

@@ -10,7 +10,11 @@
 
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include "afxwin.h"
+#include "Core\StringUtil.h"
+
+typedef std::unordered_map<CString,CString,Core::CStringHash,Core::CStringEqul> CStringMap;
 
 // CDDEMonitorDlg ¹ï¸Ü¤è¶ô
 class CDDEMonitorDlg : public CDialogEx
@@ -52,9 +56,9 @@ public:
 
 	CButton m_btnAdvise;
 
-	std::map<CString,CString> m_mapCurItem;
+	CStringMap m_mapCurItem;
 
-	std::vector<std::map<CString,CString> > m_lstOutput;
+	std::vector<CStringMap> m_lstOutput;
 
 public:
 	afx_msg void OnClose();
@@ -67,5 +71,6 @@ public:
 	afx_msg void OnDDEFuncGridClick(NMHDR *pNotifyStruct, LRESULT* /*pResult*/);
 	
 	afx_msg void OnBnClickedButtonAdvise();
+	afx_msg LRESULT OnUpdateOutput( WPARAM wParam,LPARAM lParam);
 	
 };

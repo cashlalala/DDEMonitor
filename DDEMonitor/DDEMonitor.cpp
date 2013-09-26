@@ -6,6 +6,8 @@
 #include "DDEMonitor.h"
 #include "DDEMonitorDlg.h"
 
+#include <locale.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -69,6 +71,8 @@ BOOL CDDEMonitorApp::InitInstance()
 	// TODO: 您應該適度修改此字串
 	// (例如，公司名稱或組織名稱)
 	SetRegistryKey(_T("本機 AppWizard 所產生的應用程式"));
+
+	setlocale(LC_CTYPE,"zh-TW");
 
 	CDDEMonitorDlg dlg;
 	m_pMainWnd = &dlg;
