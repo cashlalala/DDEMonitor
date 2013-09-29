@@ -54,18 +54,20 @@ namespace DDE
 				dwLen = DdeQueryString(dwInst,hsz1,0,0,CP_WINUNICODE);
 				DdeQueryString(dwInst,hsz1,pItem->strTopic.GetBuffer(dwLen+2),dwLen+1,CP_WINUNICODE);
 				pItem->strTopic.ReleaseBuffer();
-				TRACE(_T("Topic: %s\n"),pItem->strTopic);
 
 				dwLen = DdeQueryString(dwInst,hsz2,0,0,CP_WINUNICODE);
 				DdeQueryString(dwInst,hsz2,pItem->strItem.GetBuffer(dwLen+2),dwLen+1,CP_WINUNICODE);
 				pItem->strItem.ReleaseBuffer();
-				TRACE(_T("Item: %s\n"),pItem->strItem);
 
 				CWnd* pWnd = AfxGetMainWnd();
 				::PostMessage(pWnd->m_hWnd,WM_UPDATE_DATA,(WPARAM)pItem,(LPARAM)pData);
-				TRACE("XTYP_ADVDATA %s\n",lpszData);
+				TRACE("Topic[%s], Item[%s], DATA %s\n",pItem->strTopic,pItem->strItem,lpszData);
 				break;
 			}
+		case XTYP_ADVREQ:
+			TRACE(_T("XTYP_ADVREQ\n"));
+			break;
+
 		default:
 			break;
 		}
@@ -173,6 +175,7 @@ namespace DDE
 		if (!hData)
 			throw CDDEException(CDDEException::E_DATA_FAILED,CDDEException::GetLastError(InstanceMap[strInst]));
 
+		CString strReturn(L"");
 		if (unType&XCLASS_DATA)
 		{
 			char lpszData[100];
@@ -180,10 +183,10 @@ namespace DDE
 			DWORD dwResult = DdeGetData(hData,(LPBYTE)lpszData,99,0);
 			TRACE("GetData in Transaction: %s\n",lpszData);
 			FreeDataHandle(InstanceMap[strInst],hData);
-			return CA2W(lpszData);
+			strReturn = CA2W(lpszData);
 		}
-		else 
-			return _T("");
+		TRACE(_T("[%s][%s][%d]:[%s]\n"),strConvId,strItem,unType,strReturn);
+		return strReturn;
 	}
 
 	HSZ CDDEOperation::CreateStrHandle( DWORD dwInst, const CString& strTarget )
