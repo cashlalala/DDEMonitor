@@ -117,7 +117,7 @@
     <ClInclude Include="DDEMonitor.h" />
     <ClInclude Include="DDEMonitorDlg.h" />
     <ClInclude Include="DDE\DDEException.h" />
-    <ClInclude Include="DDE\DDEItems.h" />
+    <ClInclude Include="DDE\DDEItemsHelper.h" />
     <ClInclude Include="DDE\DDEKernel.h" />
     <ClInclude Include="DDE\DDEOperation.h" />
     <ClInclude Include="Resource.h" />
@@ -139,6 +139,7 @@
     <ClCompile Include="DDEMonitor.cpp" />
     <ClCompile Include="DDEMonitorDlg.cpp" />
     <ClCompile Include="DDE\DDEException.cpp" />
+    <ClCompile Include="DDE\DDEItemsHelper.cpp" />
     <ClCompile Include="DDE\DDEOperation.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

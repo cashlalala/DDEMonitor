@@ -51,26 +51,31 @@ public:
 	CString m_strConvId;
 	CString m_strItemName;
 
+	//controls 
+	CComboBox m_ctrolItem;
+	CComboBox m_ctrolItemName;
+
 	CGridCtrl m_ctrlGridDDEFunc;
 	CGridCtrl m_ctrlGridOutput;
 
+	CButton m_btnAdd;
+	CButton m_btnRmv;
+
 	CButton m_btnAdvise;
 
+	//model
 	CStringMap m_mapCurItem;
-
 	std::vector<CStringMap> m_lstOutput;
 
 public:
 	afx_msg void OnClose();
 	afx_msg void OnBnClickedButtonConn();
-	afx_msg void OnBnClickedButtonGetitem();
 	afx_msg void OnEnChangeEdit2();
-	afx_msg void OnBnClickedButtonCancelAdvice();
 	afx_msg void OnBnClickedButtonAdd();
 	afx_msg void OnBnClickedButtonRemove();
 	afx_msg void OnDDEFuncGridClick(NMHDR *pNotifyStruct, LRESULT* /*pResult*/);
 	
 	afx_msg void OnBnClickedButtonAdvise();
 	afx_msg LRESULT OnUpdateOutput( WPARAM wParam,LPARAM lParam);
-	
-};
+
+	};

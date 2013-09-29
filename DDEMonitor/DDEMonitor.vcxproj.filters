@@ -89,11 +89,11 @@
     <ClInclude Include="targetver.h">
       <Filter>Main</Filter>
     </ClInclude>
-    <ClInclude Include="DDE\DDEItems.h">
-      <Filter>DDE</Filter>
-    </ClInclude>
     <ClInclude Include="Core\MapUtil.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DDE\DDEItemsHelper.h">
+      <Filter>DDE</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -144,6 +144,9 @@
     </ClCompile>
     <ClCompile Include="Core\MapUtil.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="DDE\DDEItemsHelper.cpp">
+      <Filter>DDE</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

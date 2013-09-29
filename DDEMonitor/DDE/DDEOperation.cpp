@@ -158,7 +158,7 @@ namespace DDE
 			throw CDDEException(CDDEException::E_DISCONN_FAILED,CDDEException::GetLastError(dwInst));
 	}
 
-	void CDDEOperation::DoTransaction( const CString& strConvId, const CString& strItem, UINT unFmt, UINT unType, DWORD dwTimeout )
+	CString CDDEOperation::DoTransaction( const CString& strConvId, const CString& strItem, UINT unFmt, UINT unType, DWORD dwTimeout/*=DDE_DEFAULT_TIMEOUT*/ )
 	{
 		const HCONV hConv = m_mapConversation[strConvId];
 		CString strInst, strSvr, strTopic;
@@ -180,8 +180,10 @@ namespace DDE
 			DWORD dwResult = DdeGetData(hData,(LPBYTE)lpszData,99,0);
 			TRACE("GetData in Transaction: %s\n",lpszData);
 			FreeDataHandle(InstanceMap[strInst],hData);
+			return CA2W(lpszData);
 		}
-		
+		else 
+			return _T("");
 	}
 
 	HSZ CDDEOperation::CreateStrHandle( DWORD dwInst, const CString& strTarget )
@@ -199,6 +201,11 @@ namespace DDE
 		strSvr = strConvId.Tokenize(_T(":"),nIdx);
 		strTopic = strConvId.Tokenize(_T(":"),nIdx);
 
+	}
+
+	CString CDDEOperation::Request( const CString& strConvId, const CString& strItem, UINT unFmt, DWORD dwTimeout /*= DDE_DEFAULT_TIMEOUT*/ )
+	{
+		return DoTransaction(strConvId, strItem, unFmt, XTYP_REQUEST ,dwTimeout);
 	}
 
 

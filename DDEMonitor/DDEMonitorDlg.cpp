@@ -8,7 +8,7 @@
 #include "afxdialogex.h"
 #include "DDE\DDEException.h"
 #include "DDE\DDEKernel.h"
-#include "DDE\DDEItems.h"
+#include "DDE\DDEItemsHelper.h"
 
 #include <unordered_map>
 
@@ -19,7 +19,6 @@
 using namespace DDE;
 
 #define MMSDDSINST _T("MMS")
-
 
 // 對 App About 使用 CAboutDlg 對話方塊
 
@@ -68,15 +67,19 @@ CDDEMonitorDlg::CDDEMonitorDlg(CWnd* pParent /*=NULL*/)
 
 void CDDEMonitorDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_EDIT1, m_strServer);
-	DDX_Text(pDX, IDC_EDIT2, m_strTopic);
-	DDX_Text(pDX, IDC_EDIT3, m_strItem);
-	DDX_Control(pDX, IDC_GRID, m_ctrlGridDDEFunc);
-	DDX_Control(pDX, IDC_GRID_OUTPUT, m_ctrlGridOutput);	
-	DDX_Text(pDX, IDC_EDIT_ITEMNAME, m_strItemName);
-	DDX_Control(pDX, IDC_BUTTON_ADVISE, m_btnAdvise);
-}
+CDialogEx::DoDataExchange(pDX);
+DDX_Text(pDX, IDC_EDIT1, m_strServer);
+DDX_Text(pDX, IDC_EDIT2, m_strTopic);
+DDX_Text(pDX, IDC_CB_ITEM, m_strItem);
+DDX_Control(pDX, IDC_GRID, m_ctrlGridDDEFunc);
+DDX_Control(pDX, IDC_GRID_OUTPUT, m_ctrlGridOutput);	
+DDX_Text(pDX, IDC_CB_ITEMNAME, m_strItemName);
+DDX_Control(pDX, IDC_BUTTON_ADVISE, m_btnAdvise);
+DDX_Control(pDX, IDC_CB_ITEM, m_ctrolItem);
+DDX_Control(pDX, IDC_CB_ITEMNAME, m_ctrolItemName);
+DDX_Control(pDX, IDC_BUTTON_ADD, m_btnAdd);
+DDX_Control(pDX, IDC_BUTTON_Remove, m_btnRmv);
+	}
 
 BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -84,7 +87,6 @@ BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON_CONN, &CDDEMonitorDlg::OnBnClickedButtonConn)
-	ON_BN_CLICKED(IDC_BUTTON_GETITEM, &CDDEMonitorDlg::OnBnClickedButtonGetitem)
 	ON_BN_CLICKED(IDC_BUTTON_ADD, &CDDEMonitorDlg::OnBnClickedButtonAdd)
 	ON_BN_CLICKED(IDC_BUTTON_Remove, &CDDEMonitorDlg::OnBnClickedButtonRemove)
 	ON_NOTIFY(NM_CLICK, IDC_GRID, &CDDEMonitorDlg::OnDDEFuncGridClick)
@@ -125,11 +127,13 @@ BOOL CDDEMonitorDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 設定小圖示
 
 	// TODO: 在此加入額外的初始設定
-	m_ctrlGridDDEFunc.SetEditable(TRUE);
+
+	m_ctrlGridDDEFunc.SetEditable(FALSE);
 	m_ctrlGridDDEFunc.EnableDragAndDrop(TRUE);
 	m_ctrlGridDDEFunc.SetColumnCount(5);
 	m_ctrlGridDDEFunc.SetFixedRowCount(1);
 	m_ctrlGridDDEFunc.SetRowCount(1);
+
 	GV_ITEM item;
 
 	item.mask = GVIF_TEXT;
@@ -138,70 +142,40 @@ BOOL CDDEMonitorDlg::OnInitDialog()
 	item.strText = _T("Item DDE Id");
 	m_ctrlGridDDEFunc.SetItem(&item);
 
-	item.mask = GVIF_TEXT;
 	item.row = 0;
 	item.col = 1;
 	item.strText = _T("Item Name");
 	m_ctrlGridDDEFunc.SetItem(&item);
 
-	m_mapCurItem[JY_AMP_TIME].LoadString(IDS_TIME);
-	m_mapCurItem[JY_AMP_RISEFALL].LoadString(IDS_RISEFALL);
-	m_mapCurItem[JY_AMP_STRIKEPC].LoadString(IDS_STRIKEPRICE);
-	m_mapCurItem[JY_AMP_BUYPC].LoadString(IDS_BUYPRICE);
-	m_mapCurItem[JY_AMP_SELLPC].LoadString(IDS_SELLPRICE);
-	m_mapCurItem[JY_AMP_VOLUME].LoadString(IDS_VOLUME);
-	
-	m_ctrlGridDDEFunc.InsertRow(JY_AMP_TIME);
-	m_ctrlGridDDEFunc.SetItemText(1,1,_T("時間"));	
-	m_ctrlGridDDEFunc.InsertRow(JY_AMP_RISEFALL);
-	m_ctrlGridDDEFunc.SetItemText(2,1,_T("漲跌"));
-	m_ctrlGridDDEFunc.InsertRow(JY_AMP_STRIKEPC);
-	m_ctrlGridDDEFunc.SetItemText(3,1,_T("成交價"));
-	m_ctrlGridDDEFunc.InsertRow(JY_AMP_BUYPC);
-	m_ctrlGridDDEFunc.SetItemText(4,1,_T("買價"));
-	m_ctrlGridDDEFunc.InsertRow(JY_AMP_SELLPC);
-	m_ctrlGridDDEFunc.SetItemText(5,1,_T("賣價"));
-	m_ctrlGridDDEFunc.InsertRow(JY_AMP_VOLUME);
-	m_ctrlGridDDEFunc.SetItemText(6,1,_T("成交量"));
-
+	//m_mapCurItem[JY_AMP_TIME].LoadString(IDS_TIME);
+	//m_mapCurItem[JY_AMP_RISEFALL].LoadString(IDS_RISEFALL);
+	//m_mapCurItem[JY_AMP_STRIKEPC].LoadString(IDS_STRIKEPRICE);
+	//m_mapCurItem[JY_AMP_BUYPC].LoadString(IDS_BUYPRICE);
+	//m_mapCurItem[JY_AMP_SELLPC].LoadString(IDS_SELLPRICE);
+	//m_mapCurItem[JY_AMP_VOLUME].LoadString(IDS_VOLUME);
 
 	m_ctrlGridDDEFunc.Invalidate();
 
-	m_ctrlGridOutput.SetEditable(TRUE);
+	m_ctrlGridOutput.SetEditable(FALSE);
 	m_ctrlGridOutput.EnableDragAndDrop(FALSE);
 	m_ctrlGridOutput.SetRowCount(2);
-	m_ctrlGridOutput.SetColumnCount(7);
+	m_ctrlGridOutput.SetColumnCount(DDE_ITEM_STRINGID_COUNT);
 	m_ctrlGridOutput.SetFixedRowCount(1);
 
-	item.row = 0;
+	m_ctrolItem.AddString(JY_AMP_ID);
+
 	item.col = 0;
-	item.strText = _T("時間");
-	m_ctrlGridOutput.SetItem(&item);
-
-	item.row = 0;
-	item.col = 1;
-	item.strText = _T("漲跌");
-	m_ctrlGridOutput.SetItem(&item);
-
-	item.row = 0;
-	item.col = 2;
-	item.strText = _T("成交價");
-	m_ctrlGridOutput.SetItem(&item);
-
-	item.row = 0;
-	item.col = 3;
-	item.strText = _T("買價");
-	m_ctrlGridOutput.SetItem(&item);
-
-	item.row = 0;
-	item.col = 4;
-	item.strText = _T("賣價");
-	m_ctrlGridOutput.SetItem(&item);
-
-	item.row = 0;
-	item.col = 5;
-	item.strText = _T("成交量");
-	m_ctrlGridOutput.SetItem(&item);
+	for (const auto& strId : DDE_ITEM_STRINGID_TABLE)
+	{
+		CString strItemName;
+		strItemName.LoadString(strId);
+		m_ctrolItemName.AddString(strItemName);
+		
+		item.row = 0;
+		item.strText.LoadString(strId);
+		m_ctrlGridOutput.SetItem(&item);
+		++item.col;
+	}
 
 	m_ctrlGridOutput.Invalidate();
 
@@ -300,53 +274,25 @@ void CDDEMonitorDlg::OnBnClickedButtonConn()
 	catch (CDDEException& e)
 	{
 		TRACE(_T("%s\n"),e.twhat());
-	}
-	catch (std::exception& e)
-	{
-		CString strWhat = CA2W(e.what());
-		TRACE(_T("%s\n"),strWhat);
+		AfxMessageBox(e.twhat(),MB_OK);
 	}
 	
 }
 
-
-void CDDEMonitorDlg::OnBnClickedButtonGetitem()
-{
-	UpdateData(TRUE);
-
-	try
-	{
-		m_ddeOper.DoTransaction(m_strConvId,m_strItem,CF_TEXT,XTYP_ADVSTART|XTYPF_ACKREQ,5000);
-	}
-	catch (CDDEException& e)
-	{
-		TRACE(_T("%s\n"),e.twhat());
-	}
-}
-
-
-void CDDEMonitorDlg::OnBnClickedButtonCancelAdvice()
-{
-	try
-	{
-		m_ddeOper.DoTransaction(m_strConvId,m_strItem,CF_TEXT,XTYP_ADVSTOP,5000);
-	}
-	catch (CDDEException& e)
-	{
-		TRACE(_T("%s\n"),e.twhat());
-	}
-}
-
-
 void CDDEMonitorDlg::OnBnClickedButtonAdd()
 {
 	UpdateData(TRUE);
-	if (m_mapCurItem.end()==m_mapCurItem.find(m_strItem))
+	if (m_strItem.IsEmpty()||m_strItemName.IsEmpty())
+		return;
+
+	CString strId = CDDEItemsHelper::GetIDFromName(m_strItemName);
+	CString strItemId = m_strItem+strId;
+	if (m_mapCurItem.end()==m_mapCurItem.find(strItemId))
 	{
-		m_mapCurItem[m_strItem] = m_strItemName;
-		m_ctrlGridDDEFunc.InsertRow(m_strItem);	
+		m_mapCurItem[strItemId] = m_strItemName;
+		m_ctrlGridDDEFunc.InsertRow(strItemId);	
+		m_ctrlGridDDEFunc.SetItemText(m_ctrlGridDDEFunc.GetRowCount()-1,1,m_strItemName);
 	}
-	m_ctrlGridDDEFunc.SetItemText(m_ctrlGridDDEFunc.GetRowCount()-1,1,m_strItemName);
 	m_ctrlGridDDEFunc.Invalidate();
 }
 
@@ -355,22 +301,26 @@ void CDDEMonitorDlg::OnBnClickedButtonRemove()
 {
 	UpdateData(TRUE);
 
+	if (m_strItem.IsEmpty()||m_strItemName.IsEmpty())
+		return;
+
 	for (int i=1;i<m_ctrlGridDDEFunc.GetRowCount();++i)
 	{
-		TRACE(L"Current item %s...\n",m_ctrlGridDDEFunc.GetItemText(i,0));
-		if (m_strItem == m_ctrlGridDDEFunc.GetItemText(i,0)
+		TRACE(L"Current item [%s,%s]...\n",m_ctrlGridDDEFunc.GetItemText(i,0),m_ctrlGridDDEFunc.GetItemText(i,1));
+		CString& strItemId = m_ctrlGridDDEFunc.GetItemText(i,0);
+		if (strItemId.Find(m_strItem)!=-1
 			&& m_strItemName == m_ctrlGridDDEFunc.GetItemText(i,1))
 		{
-			CStringMap::iterator itItem = m_mapCurItem.find(m_strItem);
+			CStringMap::iterator itItem = m_mapCurItem.find(strItemId);
 			m_mapCurItem.erase(itItem);
 			m_ctrlGridDDEFunc.DeleteRow(i);
 			m_ctrlGridDDEFunc.Invalidate();
+
+			m_strItem = _T("");
+			m_strItemName = _T("");
 			break;
 		}
 	}
-
-	m_strItem = _T("");
-	m_strItemName = _T("");
 
 	UpdateData(FALSE);
 }
@@ -382,7 +332,9 @@ void CDDEMonitorDlg::OnDDEFuncGridClick(NMHDR *pNotifyStruct, LRESULT* /*pResult
 
 	if (pItem->iRow!=0) // the header line
 	{
-		m_strItem = m_ctrlGridDDEFunc.GetItemText(pItem->iRow, 0);
+		UpdateData(TRUE);
+		int nIdx = 0;
+		m_strItem = m_ctrlGridDDEFunc.GetItemText(pItem->iRow, 0).Tokenize(_T("."),nIdx);
 		m_strItemName = m_ctrlGridDDEFunc.GetItemText(pItem->iRow, 1);
 		UpdateData(FALSE);
 	}
@@ -404,11 +356,31 @@ void CDDEMonitorDlg::OnBnClickedButtonAdvise()
 		if (bIsStart)
 		{
 			m_btnAdvise.SetWindowText(_T("Stop Advise"));
+
+			//init the data of first row 
+			m_ctrlGridOutput.InsertRow(_T("-"),1);
+			m_lstOutput.push_back(CStringMap());
+			CStringMap& m_mapFirstItem = m_lstOutput.front();
+
 			for (auto itemPair : m_mapCurItem)
 			{
-				m_ddeOper.DoTransaction(m_strConvId,itemPair.first,CF_TEXT,XTYP_REQUEST,60000);
+				int i=0;
+				for (i=0;i<m_ctrlGridOutput.GetColumnCount();++i)
+				{
+					CString& strItemName = m_ctrlGridOutput.GetItemText(0,i); //get the item name from title
+					if (strItemName==itemPair.second)
+						break;
+				}
+				CString strItemResult = m_ddeOper.Request(m_strConvId,itemPair.first,CF_TEXT);
+				m_ctrlGridOutput.SetItemText(1,i,strItemResult);
+				m_mapFirstItem[itemPair.first] = strItemResult;
+			}
+			m_ctrlGridOutput.Invalidate();
 
-				m_ddeOper.DoTransaction(m_strConvId,itemPair.first,CF_TEXT,XTYP_ADVSTART,5000);
+			//start to advise
+			for (auto itemPair : m_mapCurItem)
+			{
+				m_ddeOper.DoTransaction(m_strConvId,itemPair.first,CF_TEXT,XTYP_ADVSTART);
 			}
 		}
 		else
@@ -416,15 +388,21 @@ void CDDEMonitorDlg::OnBnClickedButtonAdvise()
 			m_btnAdvise.SetWindowText(_T("Start Advise"));
 			for (auto itemPair : m_mapCurItem)
 			{
-				m_ddeOper.DoTransaction(m_strConvId,itemPair.first,CF_TEXT,XTYP_ADVSTOP,5000);
+				m_ddeOper.DoTransaction(m_strConvId,itemPair.first,CF_TEXT,XTYP_ADVSTOP);
 			}
 		}
+
+		m_ctrolItem.EnableWindow(!bIsStart);
+		m_ctrolItemName.EnableWindow(!bIsStart);
+		m_btnAdd.EnableWindow(!bIsStart);
+		m_btnRmv.EnableWindow(!bIsStart);
 	}
 	catch (CDDEException& e)
 	{
 		TRACE(_T("%s\n"),e.twhat());
 	}
 
+	UpdateData(FALSE);
 }
 
 LRESULT CDDEMonitorDlg::OnUpdateOutput( WPARAM wParam,LPARAM lParam )
@@ -434,35 +412,30 @@ LRESULT CDDEMonitorDlg::OnUpdateOutput( WPARAM wParam,LPARAM lParam )
 	TCHAR* pData = (TCHAR*) lParam;
 	TypDDEItem* pItem = (TypDDEItem*) wParam;
 
+	//get a copy from last tuple
 	CStringMap mapTuple;
 	if (m_lstOutput.size()!=0)
 		mapTuple = m_lstOutput.front();
 	else
-	{
-		//ensure all items exist
-		for (auto& itemPair : m_mapCurItem)
-		{
-			mapTuple[itemPair.first] = _T("-");
-		}
-	}
+		VERIFY(FALSE); //shouldn't be happend
 
-	//update the item
-	wcslen(pData);
+	//update the specific item
 	mapTuple[pItem->strItem] = pData;
 	m_lstOutput.insert(m_lstOutput.begin(),mapTuple);
 
+	//push into output
 	m_ctrlGridOutput.InsertRow(_T("-"),1);
-
 	for (int i=0;i<m_ctrlGridOutput.GetColumnCount();++i)
 	{
-		CString& strItem = m_ctrlGridOutput.GetItemText(0,i);
-		CString strID = CString(JY_AMP_ID) + GET_ID_FROM_NAME(strItem);
+		CString& strItem = m_ctrlGridOutput.GetItemText(0,i); //get the item name from title
+		CString strID = m_strItem + CDDEItemsHelper::GetIDFromName(strItem); //get the relate item id from name
+		TRACE(_T("%s:%s\n"),strID,mapTuple[strID]);
 		m_ctrlGridOutput.SetItemText(1,i,mapTuple[strID]);
 		if (pItem->strItem==strID)
-			m_ctrlGridOutput.SetItemBkColour(1,i,RGB(0,0,255));
-		
+			m_ctrlGridOutput.SetItemBkColour(1,i,RGB(0,0,255));		
 	}
 	m_ctrlGridOutput.Invalidate();
+
 	TRACE(_T("Update done\n"));
 
 	delete[] pData;

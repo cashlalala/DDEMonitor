@@ -3,6 +3,8 @@
 #include <ddeml.h>
 #include <map>
 
+#define DDE_DEFAULT_TIMEOUT 5000
+
 namespace DDE
 {
 	class CDDEOperation
@@ -13,9 +15,12 @@ namespace DDE
 
 		void InitInstance(const CString& strInstName, DWORD dwCmd = APPCMD_CLIENTONLY);
 
+		//returns an connection id
 		CString Connect(const CString& strInst, const CString& strSvr, const CString& strTopic, PCONVCONTEXT pConvContext);
 
-		void DoTransaction(const CString& strConvId, const CString& strItem, UINT unFmt, UINT unType, DWORD dwTimeout);
+		CString Request(const CString& strConvId, const CString& strItem, UINT unFmt, DWORD dwTimeout = DDE_DEFAULT_TIMEOUT);
+		
+		CString DoTransaction(const CString& strConvId, const CString& strItem, UINT unFmt, UINT unType, DWORD dwTimeout=DDE_DEFAULT_TIMEOUT);
 
 		void UninitAll();
 

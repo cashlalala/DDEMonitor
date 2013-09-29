@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #ifdef UNICODE
 #define CP(TEXT) _T(TEXT)
 #else
@@ -36,24 +38,17 @@
 #define JY_AMP_CODE JY_AMP(DDEID_CODE) //¥N½X
 #define JY_AMP_NAME JY_AMP(DDEID_NAME) //¦WºÙ
 
-#define GET_NAME_FROM_ID(id) \
-((id.Right(4)==DDEID_RISEFALL)? DDENAME_RISEFALL :\
-(id.Right(4)==DDEID_STRIKEPC)? DDENAME_STRIKEPC :\
-(id.Right(4)==DDEID_VOLUME)? DDENAME_VOLUME :\
-(id.Right(4)==DDEID_BUYPC)? DDENAME_BUYPC :\
-(id.Right(4)==DDEID_SELLPC)? DDENAME_SELLPC :\
-(id.Right(4)==DDEID_TIME)? DDENAME_TIME :\
-(id.Right(5)==DDEID_CODE)? DDENAME_CODE :\
-(id.Right(5)==DDEID_NAME)? DDENAME_NAME :\
-CP(""))
+#define DDE_ITEM_STRINGID_COUNT 8
 
-#define GET_ID_FROM_NAME(name) \
-((name==DDENAME_RISEFALL)? DDEID_RISEFALL:\
-(name==DDENAME_STRIKEPC)? DDEID_STRIKEPC:\
-(name==DDENAME_VOLUME)? DDEID_VOLUME:\
-(name==DDENAME_BUYPC)? DDEID_BUYPC:\
-(name==DDENAME_SELLPC)? DDEID_SELLPC:\
-(name==DDENAME_TIME)? DDEID_TIME:\
-(name==DDENAME_CODE)? DDEID_CODE:\
-(name==DDENAME_NAME)? DDEID_NAME:\
-CP(""))
+namespace DDE
+{
+	extern const std::array<int,DDE_ITEM_STRINGID_COUNT> DDE_ITEM_STRINGID_TABLE;
+
+	class CDDEItemsHelper
+	{
+	public:
+		static CString GetNameFromID(const CString& strId);
+		static CString GetIDFromName(const CString& strName);
+	};
+}
+
