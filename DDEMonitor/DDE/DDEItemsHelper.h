@@ -39,14 +39,24 @@
 #define JY_AMP_NAME JY_AMP(DDEID_NAME) //¦WºÙ
 
 #define DDE_ITEM_STRINGID_COUNT 8
+#define STATISTIC_ITEM_STRINGID_COUNT 6
+
+#define STATISTIC_TIME_IDX 0
+#define STATISTIC_OPENPC_IDX 1
+#define STATISTIC_HIGHPC_IDX 2
+#define STATISTIC_LOWPC_IDX 3
+#define STATISTIC_CLOSEPC_IDX 4
+#define STATISTIC_VOL_IDX 5
 
 namespace DDE
 {
 	extern const std::array<int,DDE_ITEM_STRINGID_COUNT> DDE_ITEM_STRINGID_TABLE;
+	extern const std::array<int,STATISTIC_ITEM_STRINGID_COUNT> STATISTIC_ITEM_STRINGID_TABLE;
 
 	class CDDEItemsHelper
 	{
 	public:
+		static int	   GetRCIDFromID(const CString& strId);
 		static CString GetNameFromID(const CString& strId);
 		static CString GetIDFromName(const CString& strName);
 	};

@@ -16,17 +16,19 @@ namespace DDE
 	IDS_VOLUME
 	};
 
+	const std::array<int,STATISTIC_ITEM_STRINGID_COUNT> STATISTIC_ITEM_STRINGID_TABLE= 
+	{
+		IDS_DATETIME,
+		IDS_OPEN_PRICE,
+		IDS_HIGHEST_PRICE,
+		IDS_LOWEST_PRICE,
+		IDS_CLOSE_PRICE,
+		IDS_VOLUME
+	};
+
 	CString CDDEItemsHelper::GetNameFromID( const CString& strId )
 	{
-		int nRcId = (strId.Right(4)==DDEID_RISEFALL)? IDS_RISEFALL :
-					(strId.Right(4)==DDEID_STRIKEPC)? IDS_STRIKEPRICE :
-					(strId.Right(4)==DDEID_VOLUME)? IDS_VOLUME :
-					(strId.Right(4)==DDEID_BUYPC)? IDS_BUYPRICE :
-					(strId.Right(4)==DDEID_SELLPC)? IDS_SELLPRICE :
-					(strId.Right(4)==DDEID_TIME)? IDS_TIME :
-					(strId.Right(5)==DDEID_CODE)? IDS_CODE :
-					(strId.Right(5)==DDEID_NAME)? IDS_NAME :
-					0;
+		int nRcId = GetRCIDFromID(strId);
 		CString strName; 
 		strName.LoadString(nRcId);
 		return strName;
@@ -64,6 +66,19 @@ namespace DDE
 			}
 		}
 		return CP("");
+	}
+
+	int CDDEItemsHelper::GetRCIDFromID( const CString& strId )
+	{
+		return (strId.Right(4)==DDEID_RISEFALL)? IDS_RISEFALL :
+			(strId.Right(4)==DDEID_STRIKEPC)? IDS_STRIKEPRICE :
+			(strId.Right(4)==DDEID_VOLUME)? IDS_VOLUME :
+			(strId.Right(4)==DDEID_BUYPC)? IDS_BUYPRICE :
+			(strId.Right(4)==DDEID_SELLPC)? IDS_SELLPRICE :
+			(strId.Right(4)==DDEID_TIME)? IDS_TIME :
+			(strId.Right(5)==DDEID_CODE)? IDS_CODE :
+			(strId.Right(5)==DDEID_NAME)? IDS_NAME :
+			0;
 	}
 
 }

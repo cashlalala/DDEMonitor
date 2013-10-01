@@ -11,8 +11,11 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <array>
 #include "afxwin.h"
 #include "Core\StringUtil.h"
+#include "afxcmn.h"
+#include "DDE\DDEItemsHelper.h"
 
 typedef std::unordered_map<CString,CString,Core::CStringHash,Core::CStringEqul> CStringMap;
 
@@ -45,11 +48,17 @@ protected:
 
 public:
 	
+	//variables
+
 	CString m_strServer;
 	CString m_strTopic;
 	CString m_strItem;
 	CString m_strConvId;
 	CString m_strItemName;
+
+	int m_nInterval;
+
+	std::array<ULONG,STATISTIC_ITEM_STRINGID_COUNT> m_ulStatAry;
 
 	//controls 
 	CComboBox m_ctrolItem;
@@ -63,9 +72,15 @@ public:
 
 	CButton m_btnAdvise;
 
-	//model
+	CSliderCtrl m_ctrlSliderInterval;
+
+	//models
 	CStringMap m_mapCurItem;
 	std::vector<CStringMap> m_lstOutput;
+
+	//handle
+	DWORD m_dwTimerStatistic;
+	CEvent m_eventStatistic;
 
 public:
 	afx_msg void OnClose();
@@ -77,5 +92,7 @@ public:
 	
 	afx_msg void OnBnClickedButtonAdvise();
 	afx_msg LRESULT OnUpdateOutput( WPARAM wParam,LPARAM lParam);
-
-	};
+	afx_msg void OnNMCustomdrawSliderInterval(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnEnKillfocusEditInterval();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+};
