@@ -12,6 +12,8 @@
 #include <map>
 #include <unordered_map>
 #include <array>
+#include <Mmsystem.h>
+
 #include "afxwin.h"
 #include "Core\StringUtil.h"
 #include "afxcmn.h"
@@ -58,7 +60,15 @@ public:
 
 	int m_nInterval;
 
+	UINT m_unResolution;
+	MMRESULT m_dwTimerId;
+
 	std::array<ULONG,STATISTIC_ITEM_STRINGID_COUNT> m_ulStatAry;
+
+	FILETIME m_tLastUpdateTime;
+	ULONGLONG	m_ullLastUpdate;
+	ULONGLONG	 m_ullTimeLBound;
+	ULONGLONG	 m_ullTimeUBound;
 
 	//controls 
 	CComboBox m_ctrolItem;
@@ -82,6 +92,10 @@ public:
 	DWORD m_dwTimerStatistic;
 	CEvent m_eventStatistic;
 
+private:
+	static void CALLBACK CDDEMonitorDlg::TimerCounter(UINT uTimerID, 
+		UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
+
 public:
 	afx_msg void OnClose();
 	afx_msg void OnBnClickedButtonConn();
@@ -95,4 +109,5 @@ public:
 	afx_msg void OnNMCustomdrawSliderInterval(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnEnKillfocusEditInterval();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+
 };
