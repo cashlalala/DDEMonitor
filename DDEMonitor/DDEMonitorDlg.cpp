@@ -95,6 +95,7 @@ void CDDEMonitorDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_INTERVAL, m_nInterval);
 	DDV_MinMaxInt(pDX, m_nInterval, 60, 7200);
 	DDX_Control(pDX, IDC_SLIDER_INTERVAL, m_ctrlSliderInterval);
+	DDX_Control(pDX, IDC_BUTTON_ADDALLNAME, m_btnAddAll);
 }
 
 BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
@@ -110,6 +111,7 @@ BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
 	ON_MESSAGE(WM_UPDATE_DATA, &CDDEMonitorDlg::OnUpdateOutput)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_INTERVAL, &CDDEMonitorDlg::OnNMCustomdrawSliderInterval)
 	ON_EN_KILLFOCUS(IDC_EDIT_INTERVAL, &CDDEMonitorDlg::OnEnKillfocusEditInterval)
+	ON_BN_CLICKED(IDC_BUTTON_ADDALLNAME, &CDDEMonitorDlg::OnBnClickedButtonAddallname)
 END_MESSAGE_MAP()
 
 
@@ -419,11 +421,8 @@ void CDDEMonitorDlg::OnBnClickedButtonAdvise()
 			}
 		}
 
-		m_ctrolItem.EnableWindow(!bIsStart);
-		m_ctrolItemName.EnableWindow(!bIsStart);
-		m_btnAdd.EnableWindow(!bIsStart);
-		m_btnRmv.EnableWindow(!bIsStart);
-		m_ctrlSliderInterval.EnableWindow(!bIsStart);
+		DisableCtrl(!bIsStart);
+
 	}
 	catch (CDDEException& e)
 	{
@@ -431,6 +430,30 @@ void CDDEMonitorDlg::OnBnClickedButtonAdvise()
 	}
 
 	UpdateData(FALSE);
+}
+
+void CDDEMonitorDlg::OnBnClickedButtonAddallname()
+{
+	UpdateData(TRUE);
+
+	if (m_strItem.IsEmpty())
+		return;
+
+	for (const auto& nRCID : DDE_ITEM_STRINGID_TABLE)
+	{
+		CString strItemName;
+		strItemName.LoadString(nRCID);
+
+		CString strItemId = m_strItem + CDDEItemsHelper::GetIDFromRCID(nRCID);
+		if (m_mapCurItem.end()==m_mapCurItem.find(strItemId))
+		{
+			m_mapCurItem[strItemId] = strItemName;
+			m_ctrlGridDDEFunc.InsertRow(strItemId);	
+			m_ctrlGridDDEFunc.SetItemText(m_ctrlGridDDEFunc.GetRowCount()-1,1,strItemName);
+		}
+	}
+
+	m_ctrlGridDDEFunc.Invalidate();
 }
 
 void CDDEMonitorDlg::OnDDEFuncGridClick(NMHDR *pNotifyStruct, LRESULT* /*pResult*/)
@@ -593,4 +616,15 @@ void CDDEMonitorDlg::TimerCounter(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DW
 		pDlg->m_tLastUpdateTime = tCurrentTime;
 		memcpy(&pDlg->m_ullLastUpdate,&pDlg->m_tLastUpdateTime,sizeof(ULONGLONG));
 	}
+}
+
+
+void CDDEMonitorDlg::DisableCtrl( bool bIsStart )
+{
+	m_ctrolItem.EnableWindow(bIsStart);
+	m_ctrolItemName.EnableWindow(bIsStart);
+	m_btnAdd.EnableWindow(bIsStart);
+	m_btnRmv.EnableWindow(bIsStart);
+	m_ctrlSliderInterval.EnableWindow(bIsStart);
+	m_btnAddAll.EnableWindow(bIsStart);
 }

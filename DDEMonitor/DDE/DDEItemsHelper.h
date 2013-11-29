@@ -59,6 +59,7 @@ namespace DDE
 		static int	   GetRCIDFromID(const CString& strId);
 		static CString GetNameFromID(const CString& strId);
 		static CString GetIDFromName(const CString& strName);
+		static CString GetIDFromRCID( const int& nRCId );
 	};
 }
 

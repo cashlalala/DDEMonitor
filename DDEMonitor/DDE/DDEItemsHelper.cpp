@@ -81,4 +81,17 @@ namespace DDE
 			0;
 	}
 
+	CString CDDEItemsHelper::GetIDFromRCID( const int& nRCId )
+	{
+		return (nRCId==IDS_RISEFALL)? DDEID_RISEFALL :
+			(nRCId==IDS_STRIKEPRICE)? DDEID_STRIKEPC :
+			(nRCId==IDS_VOLUME)? DDEID_VOLUME :
+			(nRCId==IDS_BUYPRICE)? DDEID_BUYPC :
+			(nRCId==IDS_SELLPRICE)? DDEID_SELLPC :
+			(nRCId==IDS_TIME)? DDEID_TIME :
+			(nRCId==IDS_CODE)? DDEID_CODE :
+			(nRCId==IDS_NAME)? DDEID_NAME :
+			_T("");
+	}
+
 }
