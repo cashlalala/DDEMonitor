@@ -229,19 +229,19 @@ CGridDefaultCell::CGridDefaultCell()
     ncm.cbSize = sizeof(NONCLIENTMETRICS); // NONCLIENTMETRICS has an extra element after VC6
 #else
     // Check the operating system's version
-    OSVERSIONINFOEX osvi;
-    ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-    if( !GetVersionEx((OSVERSIONINFO *) &osvi))
-    {
-    	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);	
-        GetVersionEx ((OSVERSIONINFO *)&osvi);
-    }
-    
-    if (osvi.dwMajorVersion > 5)
+    //OSVERSIONINFOEX osvi;
+    //ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+    //osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+    //if( !GetVersionEx((OSVERSIONINFO *) &osvi))
+    //{
+    //	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);	
+    //    GetVersionEx ((OSVERSIONINFO *)&osvi);
+    //}
+    //
+    //if (osvi.dwMajorVersion > 5)
     	ncm.cbSize = sizeof(NONCLIENTMETRICS);
-    else
-	    ncm.cbSize = sizeof(NONCLIENTMETRICS) - sizeof(ncm.iPaddedBorderWidth);
+    //else
+	   // ncm.cbSize = sizeof(NONCLIENTMETRICS) - sizeof(ncm.iPaddedBorderWidth);
 #endif
     VERIFY(SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &ncm, 0));
 
