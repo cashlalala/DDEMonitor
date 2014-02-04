@@ -10,7 +10,7 @@
 #include "DDE\DDEKernel.h"
 #include "DDE\DDEItemsHelper.h"
 
-#include <unordered_map>
+#include <algorithm>
 
 #pragma comment (lib,"Winmm.lib")
 
@@ -59,19 +59,20 @@ END_MESSAGE_MAP()
 
 
 CDDEMonitorDlg::CDDEMonitorDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CDDEMonitorDlg::IDD, pParent)
-	, m_strServer(_T(""))
-	, m_strTopic(_T(""))
-	, m_strItem(_T(""))
-	, m_strItemName(_T(""))
-	, m_nInterval(60)
-	, m_dwTimerStatistic(0)
-	, m_eventStatistic(TRUE,TRUE)
-	, m_unResolution(10)
-	, m_dwTimerId(0)
-	, m_ullTimeLBound(0)
-	, m_ullTimeUBound(0)
-	, m_ullLastUpdate(0)
+: CDialogEx(CDDEMonitorDlg::IDD, pParent)
+, m_strServer(_T(""))
+, m_strTopic(_T(""))
+, m_strItem(_T(""))
+, m_strItemName(_T(""))
+, m_nInterval(1)
+, m_dwTimerStatistic(0)
+, m_eventStatistic(TRUE, TRUE)
+, m_unResolution(10)
+, m_dwTimerId(0)
+, m_ullTimeLBound(0)
+, m_ullTimeUBound(0)
+, m_ullLastUpdate(0)
+, m_bBeginFlag(false)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	for (auto& item : m_ulStatAry)
@@ -85,7 +86,7 @@ void CDDEMonitorDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT2, m_strTopic);
 	DDX_Text(pDX, IDC_CB_ITEM, m_strItem);
 	DDX_Control(pDX, IDC_GRID, m_ctrlGridDDEFunc);
-	DDX_Control(pDX, IDC_GRID_OUTPUT, m_ctrlGridOutput);	
+	DDX_Control(pDX, IDC_GRID_OUTPUT, m_ctrlGridOutput);
 	DDX_Text(pDX, IDC_CB_ITEMNAME, m_strItemName);
 	DDX_Control(pDX, IDC_BUTTON_ADVISE, m_btnAdvise);
 	DDX_Control(pDX, IDC_CB_ITEM, m_ctrolItem);
@@ -93,7 +94,7 @@ void CDDEMonitorDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_ADD, m_btnAdd);
 	DDX_Control(pDX, IDC_BUTTON_Remove, m_btnRmv);
 	DDX_Text(pDX, IDC_EDIT_INTERVAL, m_nInterval);
-	DDV_MinMaxInt(pDX, m_nInterval, 60, 7200);
+	DDV_MinMaxInt(pDX, m_nInterval, 1, 120);
 	DDX_Control(pDX, IDC_SLIDER_INTERVAL, m_ctrlSliderInterval);
 	DDX_Control(pDX, IDC_BUTTON_ADDALLNAME, m_btnAddAll);
 }
@@ -149,9 +150,9 @@ BOOL CDDEMonitorDlg::OnInitDialog()
 	// TODO: 在此加入額外的初始設定
 	timeBeginPeriod(m_unResolution);
 
-	m_ctrlSliderInterval.SetRange(60,7200);
+	m_ctrlSliderInterval.SetRange(1, 120);
 	m_ctrlSliderInterval.SetPageSize(300);
-	m_ctrlSliderInterval.SetPos(60);	
+	m_ctrlSliderInterval.SetPos(1);
 
 	m_ctrlGridDDEFunc.SetEditable(FALSE);
 	m_ctrlGridDDEFunc.EnableDragAndDrop(TRUE);
@@ -202,11 +203,11 @@ BOOL CDDEMonitorDlg::OnInitDialog()
 
 	try
 	{
-		m_ddeOper.InitInstance(MMSDDSINST,0);
+		m_ddeOper.InitInstance(MMSDDSINST, 0);
 	}
 	catch (CDDEException& e)
 	{
-		TRACE(_T("%s\n"),e.twhat());
+		TRACE(_T("%s\n"), e.twhat());
 	}
 
 	m_strServer = _T("MMSDDE");
@@ -277,7 +278,7 @@ void CDDEMonitorDlg::OnClose()
 	}
 	catch (DDE::CDDEException& e)
 	{
-		TRACE(_T("%s\n"),e.twhat());
+		TRACE(_T("%s\n"), e.twhat());
 	}
 
 	timeEndPeriod(m_unResolution);
@@ -290,12 +291,12 @@ void CDDEMonitorDlg::OnBnClickedButtonConn()
 	UpdateData(TRUE);
 	try
 	{
-		m_strConvId = m_ddeOper.Connect(MMSDDSINST,m_strServer,m_strTopic,NULL);
+		m_strConvId = m_ddeOper.Connect(MMSDDSINST, m_strServer, m_strTopic, NULL);
 	}
 	catch (CDDEException& e)
 	{
-		TRACE(_T("%s\n"),e.twhat());
-		AfxMessageBox(e.twhat(),MB_OK);
+		TRACE(_T("%s\n"), e.twhat());
+		AfxMessageBox(e.twhat(), MB_OK);
 	}
 
 }
@@ -303,16 +304,16 @@ void CDDEMonitorDlg::OnBnClickedButtonConn()
 void CDDEMonitorDlg::OnBnClickedButtonAdd()
 {
 	UpdateData(TRUE);
-	if (m_strItem.IsEmpty()||m_strItemName.IsEmpty())
+	if (m_strItem.IsEmpty() || m_strItemName.IsEmpty())
 		return;
 
 	CString strId = CDDEItemsHelper::GetIDFromName(m_strItemName);
-	CString strItemId = m_strItem+strId;
-	if (m_mapCurItem.end()==m_mapCurItem.find(strItemId))
+	CString strItemId = m_strItem + strId;
+	if (m_mapCurItem.end() == m_mapCurItem.find(strItemId))
 	{
 		m_mapCurItem[strItemId] = m_strItemName;
-		m_ctrlGridDDEFunc.InsertRow(strItemId);	
-		m_ctrlGridDDEFunc.SetItemText(m_ctrlGridDDEFunc.GetRowCount()-1,1,m_strItemName);
+		m_ctrlGridDDEFunc.InsertRow(strItemId);
+		m_ctrlGridDDEFunc.SetItemText(m_ctrlGridDDEFunc.GetRowCount() - 1, 1, m_strItemName);
 	}
 	m_ctrlGridDDEFunc.Invalidate();
 }
@@ -322,15 +323,15 @@ void CDDEMonitorDlg::OnBnClickedButtonRemove()
 {
 	UpdateData(TRUE);
 
-	if (m_strItem.IsEmpty()||m_strItemName.IsEmpty())
+	if (m_strItem.IsEmpty() || m_strItemName.IsEmpty())
 		return;
 
-	for (int i=1;i<m_ctrlGridDDEFunc.GetRowCount();++i)
+	for (int i = 1; i < m_ctrlGridDDEFunc.GetRowCount(); ++i)
 	{
-		TRACE(L"Current item [%s,%s]...\n",m_ctrlGridDDEFunc.GetItemText(i,0),m_ctrlGridDDEFunc.GetItemText(i,1));
-		CString& strItemId = m_ctrlGridDDEFunc.GetItemText(i,0);
-		if (strItemId.Find(m_strItem)!=-1
-			&& m_strItemName == m_ctrlGridDDEFunc.GetItemText(i,1))
+		TRACE(L"Current item [%s,%s]...\n", m_ctrlGridDDEFunc.GetItemText(i, 0), m_ctrlGridDDEFunc.GetItemText(i, 1));
+		CString& strItemId = m_ctrlGridDDEFunc.GetItemText(i, 0);
+		if (strItemId.Find(m_strItem) != -1
+			&& m_strItemName == m_ctrlGridDDEFunc.GetItemText(i, 1))
 		{
 			CStringMap::iterator itItem = m_mapCurItem.find(strItemId);
 			m_mapCurItem.erase(itItem);
@@ -351,46 +352,51 @@ void CDDEMonitorDlg::OnBnClickedButtonAdvise()
 	UpdateData(TRUE);
 
 	TCHAR lptszText[50];
-	memset(lptszText,0x0,sizeof(TCHAR)*50);
-	m_btnAdvise.GetWindowText(lptszText,48);
+	memset(lptszText, 0x0, sizeof(TCHAR)* 50);
+	m_btnAdvise.GetWindowText(lptszText, 48);
 
-	bool bIsStart = (_tcscmp(lptszText,_T("Start Advise"))==0)? true : false;
+	bool bIsStart = (_tcscmp(lptszText, _T("Start Advise")) == 0) ? true : false;
 
 	try
 	{
 		if (bIsStart)
 		{
 			GetSystemTimeAsFileTime(&m_tLastUpdateTime);
-			memcpy(&m_ullLastUpdate,&m_tLastUpdateTime,sizeof(m_ullLastUpdate));
-			m_ullTimeUBound = m_nInterval*10000000 + EQU_RANGE_100MS;
-			m_ullTimeLBound = m_nInterval*10000000 - EQU_RANGE_100MS;
-			m_dwTimerId = timeSetEvent(500,100,TimerCounter,PtrToUlong(this),
-				TIME_PERIODIC|TIME_CALLBACK_FUNCTION|TIME_KILL_SYNCHRONOUS);
-			if (!m_dwTimerId)
-			{
-				AfxMessageBox(_T("Create Timer Fail!"),MB_OK);
-				return;
-			}
+			memcpy(&m_ullLastUpdate, &m_tLastUpdateTime, sizeof(m_ullLastUpdate));
+			m_ullTimeUBound = m_nInterval * 10000000 + EQU_RANGE_100MS;
+			m_ullTimeLBound = m_nInterval * 10000000 - EQU_RANGE_100MS;
+			//m_dwTimerId = timeSetEvent(500,100,TimerCounter,PtrToUlong(this),
+			//	TIME_PERIODIC|TIME_CALLBACK_FUNCTION|TIME_KILL_SYNCHRONOUS);
+			//if (!m_dwTimerId)
+			//{
+			//	AfxMessageBox(_T("Create Timer Fail!"),MB_OK);
+			//	return;
+			//}
 
 			m_btnAdvise.SetWindowText(_T("Stop Advise"));
 
 			//init the data of first row 
 			m_lstOutput.push_back(CStringMap());
 			CStringMap& mapFirstItem = m_lstOutput.front();
-			int i=0;
+			int i = 0;
 			for (auto itemPair : m_mapCurItem)
 			{
-				CString strItemResult = m_ddeOper.Request(m_strConvId,itemPair.first,CF_TEXT);
+				CString strItemResult = m_ddeOper.Request(m_strConvId, itemPair.first, CF_TEXT);
 
 				mapFirstItem[itemPair.second] = strItemResult;
+
+				CString strTempTime;
+				strTempTime.LoadString(IDS_DATETIME);
+				if (itemPair.second == strTempTime) {
+					m_ulStatAry[STATISTIC_TIME_IDX] = _tcstoul(strTempTime, NULL, 10);
+				}
 
 				//init the first statistical data
 				CString strTempStrikePC;
 				strTempStrikePC.LoadString(IDS_STRIKEPRICE);
 				if (itemPair.second == strTempStrikePC)
 				{
-					//WaitForSingleObject(m_eventStatistic.m_hObject,INFINITE);
-					m_ulStatAry[STATISTIC_OPENPC_IDX] = _tcstoul(strItemResult,NULL,10);
+					m_ulStatAry[STATISTIC_OPENPC_IDX] = _tcstoul(strItemResult, NULL, 10);
 					m_ulStatAry[STATISTIC_CLOSEPC_IDX] = m_ulStatAry[STATISTIC_OPENPC_IDX];
 					m_ulStatAry[STATISTIC_HIGHPC_IDX] = m_ulStatAry[STATISTIC_OPENPC_IDX];
 					m_ulStatAry[STATISTIC_LOWPC_IDX] = m_ulStatAry[STATISTIC_OPENPC_IDX];
@@ -398,26 +404,26 @@ void CDDEMonitorDlg::OnBnClickedButtonAdvise()
 			}
 
 			TRACE(_T("Init value: [%lu, %lu, %lu, %lu, %lu, %lu]\n"),
-				m_ulStatAry[STATISTIC_TIME_IDX],m_ulStatAry[STATISTIC_OPENPC_IDX],
-				m_ulStatAry[STATISTIC_HIGHPC_IDX],m_ulStatAry[STATISTIC_LOWPC_IDX],
-				m_ulStatAry[STATISTIC_CLOSEPC_IDX],m_ulStatAry[STATISTIC_VOL_IDX]);
+				m_ulStatAry[STATISTIC_TIME_IDX], m_ulStatAry[STATISTIC_OPENPC_IDX],
+				m_ulStatAry[STATISTIC_HIGHPC_IDX], m_ulStatAry[STATISTIC_LOWPC_IDX],
+				m_ulStatAry[STATISTIC_CLOSEPC_IDX], m_ulStatAry[STATISTIC_VOL_IDX]);
 			//start to advise
 			for (auto itemPair : m_mapCurItem)
 			{
-				m_ddeOper.DoTransaction(m_strConvId,itemPair.first,CF_TEXT,XTYP_ADVSTART);
+				m_ddeOper.DoTransaction(m_strConvId, itemPair.first, CF_TEXT, XTYP_ADVSTART);
 			}
 		}
 		else
 		{
-			if (m_dwTimerId)
-			{
-				timeKillEvent(m_dwTimerId);
-				m_dwTimerId  = 0;
-			}
+			//if (m_dwTimerId)
+			//{
+			//	timeKillEvent(m_dwTimerId);
+			//	m_dwTimerId  = 0;
+			//}
 			m_btnAdvise.SetWindowText(_T("Start Advise"));
 			for (auto itemPair : m_mapCurItem)
 			{
-				m_ddeOper.DoTransaction(m_strConvId,itemPair.first,CF_TEXT,XTYP_ADVSTOP);
+				m_ddeOper.DoTransaction(m_strConvId, itemPair.first, CF_TEXT, XTYP_ADVSTOP);
 			}
 		}
 
@@ -426,7 +432,7 @@ void CDDEMonitorDlg::OnBnClickedButtonAdvise()
 	}
 	catch (CDDEException& e)
 	{
-		TRACE(_T("%s\n"),e.twhat());
+		TRACE(_T("%s\n"), e.twhat());
 	}
 
 	UpdateData(FALSE);
@@ -445,11 +451,11 @@ void CDDEMonitorDlg::OnBnClickedButtonAddallname()
 		strItemName.LoadString(nRCID);
 
 		CString strItemId = m_strItem + CDDEItemsHelper::GetIDFromRCID(nRCID);
-		if (m_mapCurItem.end()==m_mapCurItem.find(strItemId))
+		if (m_mapCurItem.end() == m_mapCurItem.find(strItemId))
 		{
 			m_mapCurItem[strItemId] = strItemName;
-			m_ctrlGridDDEFunc.InsertRow(strItemId);	
-			m_ctrlGridDDEFunc.SetItemText(m_ctrlGridDDEFunc.GetRowCount()-1,1,strItemName);
+			m_ctrlGridDDEFunc.InsertRow(strItemId);
+			m_ctrlGridDDEFunc.SetItemText(m_ctrlGridDDEFunc.GetRowCount() - 1, 1, strItemName);
 		}
 	}
 
@@ -458,54 +464,120 @@ void CDDEMonitorDlg::OnBnClickedButtonAddallname()
 
 void CDDEMonitorDlg::OnDDEFuncGridClick(NMHDR *pNotifyStruct, LRESULT* /*pResult*/)
 {
-	NM_GRIDVIEW* pItem = (NM_GRIDVIEW*) pNotifyStruct;
+	NM_GRIDVIEW* pItem = (NM_GRIDVIEW*)pNotifyStruct;
 	TRACE(_T("Clicked on row %d, col %d\n"), pItem->iRow, pItem->iColumn);
 
-	if (pItem->iRow!=0) // the header line
+	if (pItem->iRow != 0) // the header line
 	{
 		UpdateData(TRUE);
 		int nIdx = 0;
-		m_strItem = m_ctrlGridDDEFunc.GetItemText(pItem->iRow, 0).Tokenize(_T("."),nIdx);
+		m_strItem = m_ctrlGridDDEFunc.GetItemText(pItem->iRow, 0).Tokenize(_T("."), nIdx);
 		m_strItemName = m_ctrlGridDDEFunc.GetItemText(pItem->iRow, 1);
 		UpdateData(FALSE);
 	}
 }
 
 
-LRESULT CDDEMonitorDlg::OnUpdateOutput( WPARAM wParam,LPARAM lParam )
+LRESULT CDDEMonitorDlg::OnUpdateOutput(WPARAM wParam, LPARAM lParam)
 {
 	if (!lParam || !wParam) return E_FAIL;
 
-	TCHAR* pData = (TCHAR*) lParam;
-	TypDDEItem* pItem = (TypDDEItem*) wParam;
+	TCHAR* pData = (TCHAR*)lParam;
+	TypDDEItem* pItem = (TypDDEItem*)wParam;
+	static ULONG ulLastVol = 0;
+	static ULONG lnLastTime = m_ulStatAry[STATISTIC_TIME_IDX];
 
-	//update statistical data
-	if (IDS_STRIKEPRICE == CDDEItemsHelper::GetRCIDFromID(pItem->strItem))
+	do
 	{
-		//WaitForSingleObject(m_eventStatistic.m_hObject,INFINITE);
-		ULONG nStrikePC = _tcstoul(pData,NULL,10);
-		m_ulStatAry[STATISTIC_CLOSEPC_IDX] = nStrikePC; //always update the close price
-		m_ulStatAry[STATISTIC_HIGHPC_IDX] = (m_ulStatAry[STATISTIC_HIGHPC_IDX] > nStrikePC)? m_ulStatAry[STATISTIC_HIGHPC_IDX]:nStrikePC;
-		m_ulStatAry[STATISTIC_LOWPC_IDX] = (m_ulStatAry[STATISTIC_LOWPC_IDX] < nStrikePC)? m_ulStatAry[STATISTIC_LOWPC_IDX]:nStrikePC;
-
-	}
-
-	if (IDS_VOLUME == CDDEItemsHelper::GetRCIDFromID(pItem->strItem))
-	{
-		//WaitForSingleObject(m_eventStatistic.m_hObject,INFINITE);
-		static ULONG ulLastVol = 0;
-		int nVol = _tcstoul(pData,NULL,10);
-		if (ulLastVol!=0)
+		if (IDS_TIME == CDDEItemsHelper::GetRCIDFromID(pItem->strItem))
 		{
-			m_ulStatAry[STATISTIC_VOL_IDX] += (nVol - ulLastVol);
+			lnLastTime = m_ulStatAry[STATISTIC_TIME_IDX];
+			m_ulStatAry[STATISTIC_TIME_IDX] = _tcstoul(pData, NULL, 10);
+			const ULONG& lnNow = m_ulStatAry[STATISTIC_TIME_IDX];
+
+			//if (lnLastTime == lnNow) {
+			//	if (m_bBeginFlag && m_mapDelayOpen.count(lnNow) == m_mapDelayOpen.size())
+			//		break; //keep accumulating
+			//}
+
+			if (1 == m_nInterval) {
+				if (lnNow / 100 - lnLastTime / 100 == m_nInterval)//flush
+				{
+//					m_bBeginFlag = true;
+//#ifdef _DEBUG
+//					for (const auto& par : m_mapDelayOpen) {
+//						TRACE(_T("%s : %s\n"),par.first,par.second);
+//					}
+//#endif
+//					m_mapDelayOpen.clear();
+
+					m_ctrlGridOutput.InsertRow(_T(""), 1);
+
+					CString strTempValue;
+					strTempValue.Format(_T("%lu"), lnNow / 100);
+					m_ctrlGridOutput.SetItemText(1, 0, strTempValue);
+
+					if (m_mapOpenClose.begin() != m_mapOpenClose.end()) {
+						m_ctrlGridOutput.SetItemText(1, 1, (*m_mapOpenClose.begin()).second);
+						TRACE(_T("open price: [%s]\n"), (*m_mapOpenClose.begin()).second);
+					}
+					else {
+						strTempValue.Format(_T("%lu"), m_ulStatAry[STATISTIC_OPENPC_IDX]);
+						m_ctrlGridOutput.SetItemText(1, 1, strTempValue);
+					}
+
+					auto minmaxPair = std::minmax_element(m_mapOpenClose.begin(), m_mapOpenClose.end(),
+						[](const std::pair<ULONG, CString>& a, const std::pair<ULONG, CString>& b)->bool {
+						return (_tcstoul(a.second, NULL, 10) < _tcstoul(b.second, NULL, 10)) ? true : false;
+					});
+
+					m_ulStatAry[STATISTIC_HIGHPC_IDX] = _tcstoul((*minmaxPair.second).second, NULL, 10);
+					m_ctrlGridOutput.SetItemText(1, 2, (*minmaxPair.second).second);
+
+					m_ulStatAry[STATISTIC_LOWPC_IDX] = _tcstoul((*minmaxPair.first).second, NULL, 10);
+					m_ctrlGridOutput.SetItemText(1, 3, (*minmaxPair.first).second);
+
+					if (m_mapOpenClose.rbegin() != m_mapOpenClose.rend()) {
+						m_ctrlGridOutput.SetItemText(1, 4, (*m_mapOpenClose.rbegin()).second);
+						TRACE(_T("close price: [%s]\n"), (*m_mapOpenClose.rbegin()).second);
+					}
+					else {
+						strTempValue.Format(_T("%lu"), m_ulStatAry[STATISTIC_CLOSEPC_IDX]);
+						m_ctrlGridOutput.SetItemText(1, 4, strTempValue);
+					}
+
+					LONG lDiff = m_ulStatAry[STATISTIC_VOL_IDX] - ulLastVol;
+					strTempValue.Format(_T("%lu(%s%d)"), m_ulStatAry[STATISTIC_VOL_IDX], ((lDiff >= 0) ? L"+" : L"-"), ((lDiff >= 0) ? lDiff : -lDiff));
+					m_ctrlGridOutput.SetItemText(1, 5, strTempValue);
+					ulLastVol = m_ulStatAry[STATISTIC_VOL_IDX];
+
+					m_ctrlGridOutput.Invalidate();
+					m_mapOpenClose.clear();
+				}
+				//else
+				//	m_bBeginFlag = false;
+			}
 		}
-		ulLastVol = nVol;
-	}
-			
+
+		//update statistical data
+		if (IDS_STRIKEPRICE == CDDEItemsHelper::GetRCIDFromID(pItem->strItem))
+		{
+			m_mapOpenClose.insert(std::make_pair(m_ulStatAry[STATISTIC_TIME_IDX], pData));
+			//if (m_bBeginFlag)
+			//	m_mapDelayOpen.insert(std::make_pair(m_ulStatAry[STATISTIC_TIME_IDX], pData));
+		}
+
+		if (IDS_VOLUME == CDDEItemsHelper::GetRCIDFromID(pItem->strItem))
+		{
+			m_ulStatAry[STATISTIC_VOL_IDX] = _tcstoul(pData, NULL, 10);
+		}
+
+	} while (false);
+
 	TRACE(_T("Current change: [%lu, %lu, %lu, %lu, %lu, %lu]\n"),
-			m_ulStatAry[STATISTIC_TIME_IDX],m_ulStatAry[STATISTIC_OPENPC_IDX],
-			m_ulStatAry[STATISTIC_HIGHPC_IDX],m_ulStatAry[STATISTIC_LOWPC_IDX],
-			m_ulStatAry[STATISTIC_CLOSEPC_IDX],m_ulStatAry[STATISTIC_VOL_IDX]);
+		m_ulStatAry[STATISTIC_TIME_IDX], m_ulStatAry[STATISTIC_OPENPC_IDX],
+		m_ulStatAry[STATISTIC_HIGHPC_IDX], m_ulStatAry[STATISTIC_LOWPC_IDX],
+		m_ulStatAry[STATISTIC_CLOSEPC_IDX], m_ulStatAry[STATISTIC_VOL_IDX]);
 
 	delete[] pData;
 	delete pItem;
@@ -544,28 +616,28 @@ void CDDEMonitorDlg::OnTimer(UINT_PTR nIDEvent)
 
 	//push into output
 	int i = 0;
-	m_ctrlGridOutput.InsertRow(_T(""),1);
+	m_ctrlGridOutput.InsertRow(_T(""), 1);
 	CString strTempValue;
 
-	strTempValue.Format(_T("%lu"),m_ulStatAry[STATISTIC_OPENPC_IDX]);
-	m_ctrlGridOutput.SetItemText(1,1,strTempValue);
+	strTempValue.Format(_T("%lu"), m_ulStatAry[STATISTIC_OPENPC_IDX]);
+	m_ctrlGridOutput.SetItemText(1, 1, strTempValue);
 	//update current open to previous close
-	m_ulStatAry[STATISTIC_OPENPC_IDX] = m_ulStatAry[STATISTIC_CLOSEPC_IDX]; 
+	m_ulStatAry[STATISTIC_OPENPC_IDX] = m_ulStatAry[STATISTIC_CLOSEPC_IDX];
 
-	strTempValue.Format(_T("%lu"),m_ulStatAry[STATISTIC_HIGHPC_IDX]);
-	m_ctrlGridOutput.SetItemText(1,2,strTempValue);
-	m_ulStatAry[STATISTIC_HIGHPC_IDX] = m_ulStatAry[STATISTIC_OPENPC_IDX]; 
+	strTempValue.Format(_T("%lu"), m_ulStatAry[STATISTIC_HIGHPC_IDX]);
+	m_ctrlGridOutput.SetItemText(1, 2, strTempValue);
+	m_ulStatAry[STATISTIC_HIGHPC_IDX] = m_ulStatAry[STATISTIC_OPENPC_IDX];
 
-	strTempValue.Format(_T("%lu"),m_ulStatAry[STATISTIC_LOWPC_IDX]);
-	m_ctrlGridOutput.SetItemText(1,3,strTempValue);
-	m_ulStatAry[STATISTIC_LOWPC_IDX] = m_ulStatAry[STATISTIC_OPENPC_IDX]; 
+	strTempValue.Format(_T("%lu"), m_ulStatAry[STATISTIC_LOWPC_IDX]);
+	m_ctrlGridOutput.SetItemText(1, 3, strTempValue);
+	m_ulStatAry[STATISTIC_LOWPC_IDX] = m_ulStatAry[STATISTIC_OPENPC_IDX];
 
-	strTempValue.Format(_T("%lu"),m_ulStatAry[STATISTIC_CLOSEPC_IDX]);
-	m_ctrlGridOutput.SetItemText(1,4,strTempValue);
+	strTempValue.Format(_T("%lu"), m_ulStatAry[STATISTIC_CLOSEPC_IDX]);
+	m_ctrlGridOutput.SetItemText(1, 4, strTempValue);
 
-	strTempValue.Format(_T("%lu"),m_ulStatAry[STATISTIC_VOL_IDX]);
-	m_ctrlGridOutput.SetItemText(1,5,strTempValue);
-	m_ulStatAry[STATISTIC_VOL_IDX] = 0;	
+	strTempValue.Format(_T("%lu"), m_ulStatAry[STATISTIC_VOL_IDX]);
+	m_ctrlGridOutput.SetItemText(1, 5, strTempValue);
+	m_ulStatAry[STATISTIC_VOL_IDX] = 0;
 
 	m_eventStatistic.SetEvent();
 
@@ -573,53 +645,53 @@ void CDDEMonitorDlg::OnTimer(UINT_PTR nIDEvent)
 }
 
 void CDDEMonitorDlg::TimerCounter(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2)
-{	
+{
 	FILETIME tCurrentTime;
-	
+
 	GetSystemTimeAsFileTime(&tCurrentTime);
 
-	CDDEMonitorDlg* pDlg = (CDDEMonitorDlg*) dwUser;
+	CDDEMonitorDlg* pDlg = (CDDEMonitorDlg*)dwUser;
 
 	ULONGLONG ullCur;
-	memcpy(&ullCur,&tCurrentTime,sizeof(ULONGLONG));
+	memcpy(&ullCur, &tCurrentTime, sizeof(ULONGLONG));
 
 	ULONGLONG dwDiff = ullCur - pDlg->m_ullLastUpdate;
-	TRACE(L"[%llu]  [%llu] [%llu]\n",pDlg->m_ullTimeLBound,dwDiff,pDlg->m_ullTimeUBound);
-	if (dwDiff <= pDlg->m_ullTimeUBound && dwDiff >= pDlg->m_ullTimeLBound )
+	TRACE(L"[%llu]  [%llu] [%llu]\n", pDlg->m_ullTimeLBound, dwDiff, pDlg->m_ullTimeUBound);
+	if (dwDiff <= pDlg->m_ullTimeUBound && dwDiff >= pDlg->m_ullTimeLBound)
 	{
 		int i = 0;
-		pDlg->m_ctrlGridOutput.InsertRow(_T(""),1);
+		pDlg->m_ctrlGridOutput.InsertRow(_T(""), 1);
 		CString strTempValue;
 
-		strTempValue.Format(_T("%lu"),pDlg->m_ulStatAry[STATISTIC_OPENPC_IDX]);
-		pDlg->m_ctrlGridOutput.SetItemText(1,1,strTempValue);
+		strTempValue.Format(_T("%lu"), pDlg->m_ulStatAry[STATISTIC_OPENPC_IDX]);
+		pDlg->m_ctrlGridOutput.SetItemText(1, 1, strTempValue);
 		//update current open to previous close
-		pDlg->m_ulStatAry[STATISTIC_OPENPC_IDX] = pDlg->m_ulStatAry[STATISTIC_CLOSEPC_IDX]; 
+		pDlg->m_ulStatAry[STATISTIC_OPENPC_IDX] = pDlg->m_ulStatAry[STATISTIC_CLOSEPC_IDX];
 
-		strTempValue.Format(_T("%lu"),pDlg->m_ulStatAry[STATISTIC_HIGHPC_IDX]);
-		pDlg->m_ctrlGridOutput.SetItemText(1,2,strTempValue);
-		pDlg->m_ulStatAry[STATISTIC_HIGHPC_IDX] = pDlg->m_ulStatAry[STATISTIC_OPENPC_IDX]; 
+		strTempValue.Format(_T("%lu"), pDlg->m_ulStatAry[STATISTIC_HIGHPC_IDX]);
+		pDlg->m_ctrlGridOutput.SetItemText(1, 2, strTempValue);
+		pDlg->m_ulStatAry[STATISTIC_HIGHPC_IDX] = pDlg->m_ulStatAry[STATISTIC_OPENPC_IDX];
 
-		strTempValue.Format(_T("%lu"),pDlg->m_ulStatAry[STATISTIC_LOWPC_IDX]);
-		pDlg->m_ctrlGridOutput.SetItemText(1,3,strTempValue);
-		pDlg->m_ulStatAry[STATISTIC_LOWPC_IDX] = pDlg->m_ulStatAry[STATISTIC_OPENPC_IDX]; 
+		strTempValue.Format(_T("%lu"), pDlg->m_ulStatAry[STATISTIC_LOWPC_IDX]);
+		pDlg->m_ctrlGridOutput.SetItemText(1, 3, strTempValue);
+		pDlg->m_ulStatAry[STATISTIC_LOWPC_IDX] = pDlg->m_ulStatAry[STATISTIC_OPENPC_IDX];
 
-		strTempValue.Format(_T("%lu"),pDlg->m_ulStatAry[STATISTIC_CLOSEPC_IDX]);
-		pDlg->m_ctrlGridOutput.SetItemText(1,4,strTempValue);
+		strTempValue.Format(_T("%lu"), pDlg->m_ulStatAry[STATISTIC_CLOSEPC_IDX]);
+		pDlg->m_ctrlGridOutput.SetItemText(1, 4, strTempValue);
 
-		strTempValue.Format(_T("%lu"),pDlg->m_ulStatAry[STATISTIC_VOL_IDX]);
-		pDlg->m_ctrlGridOutput.SetItemText(1,5,strTempValue);
-		pDlg->m_ulStatAry[STATISTIC_VOL_IDX] = 0;	
+		strTempValue.Format(_T("%lu"), pDlg->m_ulStatAry[STATISTIC_VOL_IDX]);
+		pDlg->m_ctrlGridOutput.SetItemText(1, 5, strTempValue);
+		pDlg->m_ulStatAry[STATISTIC_VOL_IDX] = 0;
 
 		pDlg->m_ctrlGridOutput.Invalidate();
 
 		pDlg->m_tLastUpdateTime = tCurrentTime;
-		memcpy(&pDlg->m_ullLastUpdate,&pDlg->m_tLastUpdateTime,sizeof(ULONGLONG));
+		memcpy(&pDlg->m_ullLastUpdate, &pDlg->m_tLastUpdateTime, sizeof(ULONGLONG));
 	}
 }
 
 
-void CDDEMonitorDlg::DisableCtrl( bool bIsStart )
+void CDDEMonitorDlg::DisableCtrl(bool bIsStart)
 {
 	m_ctrolItem.EnableWindow(bIsStart);
 	m_ctrolItemName.EnableWindow(bIsStart);

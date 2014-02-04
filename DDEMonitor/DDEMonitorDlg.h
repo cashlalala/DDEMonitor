@@ -91,12 +91,17 @@ public:
 	//handle
 	DWORD m_dwTimerStatistic;
 	CEvent m_eventStatistic;
-
+	
 private:
 	static void CALLBACK CDDEMonitorDlg::TimerCounter(UINT uTimerID, 
 		UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
 
 	void DisableCtrl( bool bIsStart );
+
+	std::multimap<ULONG, CString> m_mapOpenClose;
+	std::multimap<ULONG, CString> m_mapDelayOpen;
+
+	bool m_bBeginFlag;
 
 public:
 	afx_msg void OnClose();
@@ -109,6 +114,7 @@ public:
 	afx_msg void OnBnClickedButtonAdvise();
 
 	afx_msg LRESULT OnUpdateOutput( WPARAM wParam,LPARAM lParam);
+
 	afx_msg void OnNMCustomdrawSliderInterval(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnEnKillfocusEditInterval();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
