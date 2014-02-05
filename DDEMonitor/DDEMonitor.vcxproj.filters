@@ -95,6 +95,9 @@
     <ClInclude Include="DDE\DDEItemsHelper.h">
       <Filter>DDE</Filter>
     </ClInclude>
+    <ClInclude Include="CustomControl\CustChkCell.h">
+      <Filter>CustomControl\DataGrid</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDEMonitor.cpp">
@@ -147,6 +150,9 @@
     </ClCompile>
     <ClCompile Include="DDE\DDEItemsHelper.cpp">
       <Filter>DDE</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomControl\CustChkCell.cpp">
+      <Filter>CustomControl\DataGrid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

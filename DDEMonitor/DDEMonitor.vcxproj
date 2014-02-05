@@ -104,6 +104,7 @@
     <ClInclude Include="Core\Exception.h" />
     <ClInclude Include="Core\MapUtil.h" />
     <ClInclude Include="Core\StringUtil.h" />
+    <ClInclude Include="CustomControl\CustChkCell.h" />
     <ClInclude Include="CustomControl\DataGrid\CellRange.h" />
     <ClInclude Include="CustomControl\DataGrid\GridCell.h" />
     <ClInclude Include="CustomControl\DataGrid\GridCellBase.h" />
@@ -128,6 +129,7 @@
     <ClCompile Include="Core\Exception.cpp" />
     <ClCompile Include="Core\MapUtil.cpp" />
     <ClCompile Include="Core\StringUtil.cpp" />
+    <ClCompile Include="CustomControl\CustChkCell.cpp" />
     <ClCompile Include="CustomControl\DataGrid\GridCell.cpp" />
     <ClCompile Include="CustomControl\DataGrid\GridCellBase.cpp" />
     <ClCompile Include="CustomControl\DataGrid\GridCellCheck.cpp" />

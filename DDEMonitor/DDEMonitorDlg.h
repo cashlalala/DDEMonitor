@@ -93,8 +93,8 @@ public:
 	CEvent m_eventStatistic;
 	
 private:
-	static void CALLBACK CDDEMonitorDlg::TimerCounter(UINT uTimerID, 
-		UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
+	//static void CALLBACK CDDEMonitorDlg::TimerCounter(UINT uTimerID, 
+	//	UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
 
 	void DisableCtrl( bool bIsStart );
 
@@ -117,7 +117,7 @@ public:
 
 	afx_msg void OnNMCustomdrawSliderInterval(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnEnKillfocusEditInterval();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	//afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 	afx_msg void OnBnClickedButtonAddallname();
 };
