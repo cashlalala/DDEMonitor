@@ -9,9 +9,9 @@
 #include "DDE\DDEException.h"
 #include "DDE\DDEKernel.h"
 #include "DDE\DDEItemsHelper.h"
+#include "CustomControl\CustChkCell.h"
 
 #include <algorithm>
-#include "CustomControl\CustChkCell.h"
 
 #pragma comment (lib,"Winmm.lib")
 
@@ -73,7 +73,7 @@ CDDEMonitorDlg::CDDEMonitorDlg(CWnd* pParent /*=NULL*/)
 , m_ullTimeLBound(0)
 , m_ullTimeUBound(0)
 , m_ullLastUpdate(0)
-, m_bBeginFlag(false)
+, m_nCurChkedVarCnt(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	for (auto& item : m_ulStatAry)
@@ -98,6 +98,10 @@ void CDDEMonitorDlg::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_nInterval, 1, 120);
 	DDX_Control(pDX, IDC_SLIDER_INTERVAL, m_ctrlSliderInterval);
 	DDX_Control(pDX, IDC_BUTTON_ADDALLNAME, m_btnAddAll);
+	DDX_Control(pDX, IDC_RDO_HIGH, m_ctrlFH);
+	DDX_Control(pDX, IDC_RDO_LO, m_ctrlFL);
+	DDX_Control(pDX, IDC_RDO_HORIZON, m_ctrlFHori);
+	DDX_Control(pDX, IDC_GRID2, m_ctrlFormulaGrid);
 }
 
 BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
@@ -114,6 +118,7 @@ BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_INTERVAL, &CDDEMonitorDlg::OnNMCustomdrawSliderInterval)
 	ON_EN_KILLFOCUS(IDC_EDIT_INTERVAL, &CDDEMonitorDlg::OnEnKillfocusEditInterval)
 	ON_BN_CLICKED(IDC_BUTTON_ADDALLNAME, &CDDEMonitorDlg::OnBnClickedButtonAddallname)
+	ON_BN_CLICKED(IDC_BTN_ADDFORMULA, &CDDEMonitorDlg::OnBnClickedBtnAddformula)
 END_MESSAGE_MAP()
 
 
@@ -176,6 +181,30 @@ BOOL CDDEMonitorDlg::OnInitDialog()
 
 	m_ctrlGridDDEFunc.Invalidate();
 
+	m_ctrlFormulaGrid.SetEditable(FALSE);
+	m_ctrlFormulaGrid.SetAutoSizeStyle();
+	m_ctrlFormulaGrid.EnableDragAndDrop(FALSE);
+	m_ctrlFormulaGrid.SetRowCount();
+	m_ctrlFormulaGrid.SetColumnCount(3);
+	m_ctrlFormulaGrid.SetFixedRowCount(1);
+	item.row = 0;
+	item.col = 0;
+	item.strText = _T("ID");
+	m_ctrlFormulaGrid.SetItem(&item);
+	item.row = 0;
+	item.col = 1;
+	item.strText = _T("From (time,price)");
+	m_ctrlFormulaGrid.SetItem(&item);
+	item.row = 0;
+	item.col = 2;
+	item.strText = _T("To (time,price)");
+	m_ctrlFormulaGrid.SetItem(&item);
+	item.row = 0;
+	item.col = 3;
+	item.strText = _T("Type");
+	m_ctrlFormulaGrid.SetItem(&item);
+
+	//m_ctrlGridOutput.SetSingleRowSelection();
 	m_ctrlGridOutput.SetEditable(FALSE);
 	m_ctrlGridOutput.SetAutoSizeStyle();
 	m_ctrlGridOutput.EnableDragAndDrop(FALSE);
@@ -216,6 +245,8 @@ BOOL CDDEMonitorDlg::OnInitDialog()
 
 	m_strServer = _T("MMSDDE");
 	m_strTopic = _T("FUSA");
+
+	m_ctrlFH.SetCheck(TRUE);
 
 	UpdateData(FALSE);
 
@@ -507,13 +538,14 @@ LRESULT CDDEMonitorDlg::OnUpdateOutput(WPARAM wParam, LPARAM lParam)
 			if (1 == m_nInterval) {
 				if (lnNow / 100 - lnLastTime / 100 == m_nInterval)//flush
 				{
-//					m_bBeginFlag = true;
-//#ifdef _DEBUG
-//					for (const auto& par : m_mapDelayOpen) {
-//						TRACE(_T("%s : %s\n"),par.first,par.second);
-//					}
-//#endif
-//					m_mapDelayOpen.clear();
+					
+					//					m_bBeginFlag = true;
+					//#ifdef _DEBUG
+					//					for (const auto& par : m_mapDelayOpen) {
+					//						TRACE(_T("%s : %s\n"),par.first,par.second);
+					//					}
+					//#endif
+					//					m_mapDelayOpen.clear();
 
 					m_ctrlGridOutput.InsertRow(_T(""), 1);
 
@@ -580,10 +612,10 @@ LRESULT CDDEMonitorDlg::OnUpdateOutput(WPARAM wParam, LPARAM lParam)
 
 	} while (false);
 
-	TRACE(_T("Current change: [%lu, %lu, %lu, %lu, %lu, %lu]\n"),
-		m_ulStatAry[STATISTIC_TIME_IDX], m_ulStatAry[STATISTIC_OPENPC_IDX],
-		m_ulStatAry[STATISTIC_HIGHPC_IDX], m_ulStatAry[STATISTIC_LOWPC_IDX],
-		m_ulStatAry[STATISTIC_CLOSEPC_IDX], m_ulStatAry[STATISTIC_VOL_IDX]);
+	//TRACE(_T("Current change: [%lu, %lu, %lu, %lu, %lu, %lu]\n"),
+	//	m_ulStatAry[STATISTIC_TIME_IDX], m_ulStatAry[STATISTIC_OPENPC_IDX],
+	//	m_ulStatAry[STATISTIC_HIGHPC_IDX], m_ulStatAry[STATISTIC_LOWPC_IDX],
+	//	m_ulStatAry[STATISTIC_CLOSEPC_IDX], m_ulStatAry[STATISTIC_VOL_IDX]);
 
 	delete[] pData;
 	delete pItem;
@@ -705,4 +737,36 @@ void CDDEMonitorDlg::DisableCtrl(bool bIsStart)
 	m_btnRmv.EnableWindow(bIsStart);
 	m_ctrlSliderInterval.EnableWindow(bIsStart);
 	m_btnAddAll.EnableWindow(bIsStart);
+	m_ctrlFL.EnableWindow(bIsStart);
+	m_ctrlFH.EnableWindow(bIsStart);
+	m_ctrlFHori.EnableWindow(bIsStart);
+}
+
+
+void CDDEMonitorDlg::OnBnClickedBtnAddformula()
+{
+	if (CCustChkCell::GetCheckedCnt() != CCustChkCell::SC_MAX_ALLOWEDCNT) {
+		MessageBox(_T("You need to check at least two tuples to add new formula!"), _T("Info"), MB_OK);
+		return;
+	}
+
+	Formula& formula = m_ctrlGridOutput.m_curFormual;
+	m_vecFormula.push_back(formula);
+
+	CString strFormulTiem;
+	strFormulTiem.Format(_T("%lu"), m_vecFormula.size());
+	m_ctrlFormulaGrid.SetItemText(m_vecFormula.size(), 0, strFormulTiem);
+
+	strFormulTiem.Format(_T("[%lu:%lu]"),formula.m_Id.first.ulTime,formula.m_Id.first.ulPrice);
+	m_ctrlFormulaGrid.SetItemText(m_vecFormula.size(), 1, strFormulTiem);
+
+	strFormulTiem.Format(_T("[%lu:%lu]"), formula.m_Id.second.ulTime, formula.m_Id.second.ulPrice);
+	m_ctrlFormulaGrid.SetItemText(m_vecFormula.size(), 2, strFormulTiem);
+
+	strFormulTiem.Format(_T("%s"), (formula.m_enFType == HIGH)? L"High": (formula.m_enFType == LOW)? L"LOW" : L"Horizon");
+	m_ctrlFormulaGrid.SetItemText(m_vecFormula.size(), 3, strFormulTiem);
+
+	m_ctrlFormulaGrid.Invalidate();
+
+	::PostMessage(m_ctrlGridOutput.m_hWnd, CCustGridCtrl::WM_RESET_SELECTED_CNT, 0, 0);
 }

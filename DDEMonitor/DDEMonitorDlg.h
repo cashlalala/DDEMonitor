@@ -18,6 +18,8 @@
 #include "Core\StringUtil.h"
 #include "afxcmn.h"
 #include "DDE\DDEItemsHelper.h"
+#include "CustomControl\CustGridCtrl.h"
+#include "D:\Dropbox\GitHub\DDEMonitor\DDEMonitor\CustomControl\DataGrid\GridCtrl.h"
 
 typedef std::unordered_map<CString,CString,Core::CStringHash,Core::CStringEqul> CStringMap;
 
@@ -75,7 +77,7 @@ public:
 	CComboBox m_ctrolItemName;
 
 	CGridCtrl m_ctrlGridDDEFunc;
-	CGridCtrl m_ctrlGridOutput;
+	CCustGridCtrl m_ctrlGridOutput;
 
 	CButton m_btnAdd;
 	CButton m_btnRmv;
@@ -84,9 +86,15 @@ public:
 
 	CSliderCtrl m_ctrlSliderInterval;
 
+	CButton m_ctrlFH;
+	CButton m_ctrlFL;
+	CButton m_ctrlFHori;
+
 	//models
 	CStringMap m_mapCurItem;
 	std::vector<CStringMap> m_lstOutput;
+	// a pair of time maps to a formula
+	std::vector<Formula> m_vecFormula;
 
 	//handle
 	DWORD m_dwTimerStatistic;
@@ -101,7 +109,7 @@ private:
 	std::multimap<ULONG, CString> m_mapOpenClose;
 	std::multimap<ULONG, CString> m_mapDelayOpen;
 
-	bool m_bBeginFlag;
+	int m_nCurChkedVarCnt;
 
 public:
 	afx_msg void OnClose();
@@ -120,4 +128,6 @@ public:
 	//afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 	afx_msg void OnBnClickedButtonAddallname();
+	afx_msg void OnBnClickedBtnAddformula();
+	CGridCtrl m_ctrlFormulaGrid;
 };

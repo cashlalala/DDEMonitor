@@ -61,8 +61,8 @@ namespace DDE
 
 				CWnd* pWnd = AfxGetMainWnd();
 				::PostMessage(pWnd->m_hWnd,WM_UPDATE_DATA,(WPARAM)pItem,(LPARAM)pData);
-				TRACE(L"DDE OP -> Topic[%s], Item[%s]:",pItem->strTopic,pItem->strItem);
-				TRACE(L"Data[%s]\n",lpszData);
+				//TRACE(L"DDE OP -> Topic[%s], Item[%s]:",pItem->strTopic,pItem->strItem);
+				//TRACE(L"Data[%s]\n",lpszData);
 				break;
 			}
 		case XTYP_ADVREQ:
