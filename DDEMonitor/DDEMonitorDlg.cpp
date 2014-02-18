@@ -119,6 +119,7 @@ BEGIN_MESSAGE_MAP(CDDEMonitorDlg, CDialogEx)
 	ON_EN_KILLFOCUS(IDC_EDIT_INTERVAL, &CDDEMonitorDlg::OnEnKillfocusEditInterval)
 	ON_BN_CLICKED(IDC_BUTTON_ADDALLNAME, &CDDEMonitorDlg::OnBnClickedButtonAddallname)
 	ON_BN_CLICKED(IDC_BTN_ADDFORMULA, &CDDEMonitorDlg::OnBnClickedBtnAddformula)
+	ON_BN_CLICKED(IDC_BTN_RMVFORMULA, &CDDEMonitorDlg::OnBnClickedBtnRmvformula)
 END_MESSAGE_MAP()
 
 
@@ -538,7 +539,7 @@ LRESULT CDDEMonitorDlg::OnUpdateOutput(WPARAM wParam, LPARAM lParam)
 			if (1 == m_nInterval) {
 				if (lnNow / 100 - lnLastTime / 100 == m_nInterval)//flush
 				{
-					
+
 					//					m_bBeginFlag = true;
 					//#ifdef _DEBUG
 					//					for (const auto& par : m_mapDelayOpen) {
@@ -757,16 +758,48 @@ void CDDEMonitorDlg::OnBnClickedBtnAddformula()
 	strFormulTiem.Format(_T("%lu"), m_vecFormula.size());
 	m_ctrlFormulaGrid.SetItemText(m_vecFormula.size(), 0, strFormulTiem);
 
-	strFormulTiem.Format(_T("[%lu:%lu]"),formula.m_Id.first.ulTime,formula.m_Id.first.ulPrice);
+	strFormulTiem.Format(_T("[%lu:%lu]"), formula.m_Id.first.ulTime, formula.m_Id.first.ulPrice);
 	m_ctrlFormulaGrid.SetItemText(m_vecFormula.size(), 1, strFormulTiem);
 
 	strFormulTiem.Format(_T("[%lu:%lu]"), formula.m_Id.second.ulTime, formula.m_Id.second.ulPrice);
 	m_ctrlFormulaGrid.SetItemText(m_vecFormula.size(), 2, strFormulTiem);
 
-	strFormulTiem.Format(_T("%s"), (formula.m_enFType == HIGH)? L"High": (formula.m_enFType == LOW)? L"LOW" : L"Horizon");
+	strFormulTiem.Format(_T("%s"), (formula.m_enFType == HIGH) ? L"High" : (formula.m_enFType == LOW) ? L"LOW" : L"Horizon");
 	m_ctrlFormulaGrid.SetItemText(m_vecFormula.size(), 3, strFormulTiem);
 
 	m_ctrlFormulaGrid.Invalidate();
 
 	::PostMessage(m_ctrlGridOutput.m_hWnd, CCustGridCtrl::WM_RESET_SELECTED_CNT, 0, 0);
+}
+
+void CDDEMonitorDlg::OnBnClickedBtnRmvformula()
+{
+	CCellID cellid = m_ctrlFormulaGrid.GetFocusCell();
+	if (m_vecFormula.size() > 0) {
+		std::vector<Formula>::iterator itNextEle = m_vecFormula.erase((m_vecFormula.begin() + cellid.row - 1));
+
+		CString strFormulTiem;
+		int i = cellid.row;
+		for (; itNextEle != m_vecFormula.end(); ++itNextEle, ++i) {
+			strFormulTiem.Format(_T("%d"), i );
+			m_ctrlFormulaGrid.SetItemText(i, 0, strFormulTiem);
+
+			strFormulTiem.Format(_T("[%lu:%lu]"), itNextEle->m_Id.first.ulTime, itNextEle->m_Id.first.ulPrice);
+			m_ctrlFormulaGrid.SetItemText(i, 1, strFormulTiem);
+
+			strFormulTiem.Format(_T("[%lu:%lu]"), itNextEle->m_Id.second.ulTime, itNextEle->m_Id.second.ulPrice);
+			m_ctrlFormulaGrid.SetItemText(i, 2, strFormulTiem);
+
+			strFormulTiem.Format(_T("%s"), (itNextEle->m_enFType == HIGH) ? L"High" : (itNextEle->m_enFType == LOW) ? L"LOW" : L"Horizon");
+			m_ctrlFormulaGrid.SetItemText(i, 3, strFormulTiem);
+		}
+
+		strFormulTiem.Format(_T(""));
+		m_ctrlFormulaGrid.SetItemText(i, 0, strFormulTiem);
+		m_ctrlFormulaGrid.SetItemText(i, 1, strFormulTiem);
+		m_ctrlFormulaGrid.SetItemText(i, 2, strFormulTiem);
+		m_ctrlFormulaGrid.SetItemText(i, 3, strFormulTiem);
+
+		m_ctrlFormulaGrid.Invalidate();
+	}
 }

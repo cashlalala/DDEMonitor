@@ -130,4 +130,5 @@ public:
 	afx_msg void OnBnClickedButtonAddallname();
 	afx_msg void OnBnClickedBtnAddformula();
 	CGridCtrl m_ctrlFormulaGrid;
+	afx_msg void OnBnClickedBtnRmvformula();
 };
